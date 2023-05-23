@@ -1,0 +1,14 @@
+@import '../main.scss';
+
+.game-grid {
+    background: white;
+    width: 500px;
+    height: 500px;
+    position: relative;
+    overflow: hidden;
+}
+
+.entity {
+    background: goldenrod;
+    position: absolute;
+}

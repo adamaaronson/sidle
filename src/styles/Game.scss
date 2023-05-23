@@ -1,0 +1,13 @@
+@import '../main.scss';
+
+.game-box {
+    background: $message-color;
+    padding: 1em;
+    border-radius: 1em;
+}
+
+.game-level {
+    line-height: 1.35em;
+    color: $white-color;
+    font-family: sans-serif;
+}

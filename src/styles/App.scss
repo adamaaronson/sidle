@@ -1,0 +1,15 @@
+@import '../main.scss';
+
+html, body, #root, .app {
+    height: 100%;
+}
+
+body {
+    background-color: $background-color;
+}
+
+.app {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
