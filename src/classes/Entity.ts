@@ -5,11 +5,11 @@ const ACCELERATION_OF_GRAVITY: Point = {x: 0, y: 1}
 class Entity {
     size: Point;
     position: Point;
+    color: string;
     velocity: Point;
     acceleration: Point;
-    color: string;
     
-    constructor(size: Point, position: Point, velocity?: Point, acceleration?: Point, color?: string) {
+    constructor(size: Point, position: Point, color?: string, velocity?: Point, acceleration?: Point) {
         this.size = size
         this.position = position
         this.velocity = velocity ?? {x: 0, y: 0}
@@ -52,9 +52,42 @@ class Entity {
     }
 
     handleCollisions(blocks: Entity[]) {
-        if (blocks.find(other => this.intersects(other))) {
-            this.velocity = {x: 0, y: 0};
-            this.acceleration = {x: 0, y: 0};
+        let shift: Point = {x: 0, y: 0}
+
+        for (const block of blocks.filter(other => this.intersects(other))) {
+            const overlap = this.getOverlap(block)
+
+            if (overlap.x > overlap.y) {
+                // vertical collision
+                if (block.top > this.top) {
+                    // hitting it from above
+                    shift.y -= overlap.y
+                } else {
+                    // hitting it from below
+                    shift.y += overlap.y
+                }
+                    
+            } else {
+                // horizontal collision
+                if (this.velocity.x > 0) {
+                    // hitting it from the left
+                    shift.x -= overlap.x
+                } else if (this.velocity.x < 0) {
+                    // hitting it from the right
+                    shift.x += overlap.x
+                }
+            }
+        }
+
+        this.position.x += shift.x
+        this.position.y += shift.y
+
+        if (shift.y > 0 && this.velocity.y < 0) {
+            // roofed
+            this.velocity.y = 0;
+        } else if (shift.y < 0 && this.velocity.y > 0) {
+            // grounded
+            this.velocity.y = 0;
         }
     }
 
@@ -74,6 +107,13 @@ class Entity {
         }
 
         return true
+    }
+
+    getOverlap(other: Entity) {
+        return <Point>{
+            x: Math.min(this.right, other.right) - Math.max(this.left, other.left),
+            y: Math.min(this.bottom, other.bottom) - Math.max(this.top, other.top)
+        }
     }
 }
 

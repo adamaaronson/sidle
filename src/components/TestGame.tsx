@@ -9,9 +9,7 @@ const INTERVAL_MILLISECONDS = 30
 const player = new Entity(
     SQUARE_SIZE,
     {x: 0, y: 0},
-    undefined,
-    undefined,
-    "rebeccapurple"
+    "goldenrod"
 )
 
 const blocks = [
@@ -33,7 +31,7 @@ function getStyle(entity: Entity) {
 }
 
 export default function TestGame() {
-    const [frame, setFrame] = useState(0)
+    const [, setFrame] = useState(0)
 
     const entities = [
         player,
@@ -47,12 +45,11 @@ export default function TestGame() {
     useEffect(() => {
         setInterval(() => {
             update();
-            setFrame(frame => frame + 1);
+            setFrame(frame => (frame + 1) % 256);
         }, INTERVAL_MILLISECONDS)
     }, [])
 
     return <div className="test-game">
-        {frame}
         <div className="game-grid">
             {entities.map((entity, index) => 
                 <div
