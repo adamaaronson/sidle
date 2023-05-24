@@ -9,13 +9,11 @@ class Entity {
     acceleration: Point;
     color: string;
     lastUpdated: number;
-
-    isGrounded: boolean = true;
     
     constructor(size: Point, position: Point, color?: string, velocity?: Point, acceleration?: Point) {
         this.size = size
         this.position = position
-        this.velocity = velocity ?? new Point(0, 0)
+        this.velocity = velocity ?? Point.zero()
         this.acceleration = acceleration ?? ACCELERATION_OF_GRAVITY
         this.color = color ?? "green"
         this.lastUpdated = performance.now()
@@ -47,66 +45,43 @@ class Entity {
 
     update(timestamp: number, blocks: Entity[]) {
         const secondsElapsed = (timestamp - this.lastUpdated) / 1000
-        this.updatePosition(secondsElapsed)
-        this.updateVelocity(secondsElapsed)
-        this.handleCollisions(blocks)
+
+        this.updatePosition(secondsElapsed, blocks)
+        this.updateVelocity(secondsElapsed, blocks)
+        
         this.lastUpdated = timestamp
     }
 
-    updatePosition(secondsElapsed: number) {
-        this.position.add(this.velocity.times(secondsElapsed))
-        this.position.add(this.acceleration.times(secondsElapsed ** 2).times(0.5))
-    }
+    updatePosition(secondsElapsed: number, blocks: Entity[]) {
+        const pushedAgainstSide = (this.velocity.x < 0 && this.isLeftTouching(blocks)) || (this.velocity.x > 0 && this.isRightTouching(blocks))
+        const pushedAgainstFloor = (this.acceleration.y > 0 && this.isBottomTouching(blocks))
 
-    updateVelocity(secondsElapsed: number) {
-        this.velocity.add(this.acceleration.times(secondsElapsed))
-        if (this.velocity.y > 0) {
-            this.isGrounded = false;
-        }
-    }
+        const dVelocity = this.velocity.times(secondsElapsed)
+        const ddAcceleration = this.acceleration.times(secondsElapsed ** 2).times(0.5)
 
-    handleCollisions(blocks: Entity[]) {
-        let maxShift = new Point(0, 0)
+        this.position.add(dVelocity)
+        this.position.add(ddAcceleration)
 
-        for (const block of blocks.filter(other => this.intersects(other))) {
-            let shift = new Point(0, 0)
-
-            const overlap = this.getOverlap(block)
-
-            if ((overlap.y < overlap.x && !this.isGrounded) || 
-                (overlap.x < overlap.y && ((this.velocity.x >= 0 && block.left < this.left) || (this.velocity.x <= 0 && block.left > this.left)))) {
-                // vertical collision
-                if (block.top > this.top) {
-                    // hitting it from above
-                    shift.y -= overlap.y
-                } else {
-                    // hitting it from below
-                    shift.y += overlap.y
-                }
-            } else if (overlap.x < overlap.y) {
-                // horizontal collision
-                if (this.velocity.x > 0) {
-                    // hitting it from the left
-                    shift.x -= overlap.x
-                } else if (this.velocity.x < 0) {
-                    // hitting it from the right
-                    shift.x += overlap.x
-                }
-            }
-
-            maxShift = Point.extreme(maxShift, shift)
+        if (pushedAgainstSide) {
+            this.position.x -= dVelocity.x
         }
 
-        // compensate for overlap
-        this.position.add(maxShift)
+        if (pushedAgainstFloor) {
+            this.position.y -= ddAcceleration.y
+        }
 
-        if (maxShift.y > 0 && this.velocity.y < 0) {
-            // roofed
-            this.velocity.y = 0
-        } else if (maxShift.y < 0 && this.velocity.y > 0) {
-            // grounded
-            this.velocity.y = 0
-            this.isGrounded = true
+        this.position.round()
+    }
+
+    updateVelocity(secondsElapsed: number, blocks: Entity[]) {
+        const pushedAgainstFloor = (this.acceleration.y > 0 && this.isBottomTouching(blocks))
+
+        const dAcceleration = this.acceleration.times(secondsElapsed)
+
+        this.velocity.add(dAcceleration)
+
+        if (pushedAgainstFloor) {
+            this.velocity.y -= dAcceleration.y
         }
     }
 
@@ -127,6 +102,30 @@ class Entity {
             x: Math.min(this.right, other.right) - Math.max(this.left, other.left),
             y: Math.min(this.bottom, other.bottom) - Math.max(this.top, other.top)
         }
+    }
+
+    isTopTouching(blocks: Entity[]) {
+        return blocks.some(block => 
+            this.top === block.bottom && this.right > block.left && this.left < block.right
+        )
+    }
+
+    isBottomTouching(blocks: Entity[]) {
+        return blocks.some(block => 
+            this.bottom === block.top && this.right > block.left && this.left < block.right
+        )
+    }
+
+    isLeftTouching(blocks: Entity[]) {
+        return blocks.some(block => 
+            this.left === block.right && this.bottom > block.top && this.top < block.bottom
+        )
+    }
+
+    isRightTouching(blocks: Entity[]) {
+        return blocks.some(block => 
+            this.right === block.left && this.bottom > block.top && this.top < block.bottom
+        )
     }
 }
 

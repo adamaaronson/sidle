@@ -11,20 +11,13 @@ const player = new Player(
     undefined,
     undefined,
     SQUARE_SIZE,
-    new Point(0, 0),
+    Point.zero(),
     "goldenrod"
 )
 
-const blocks = [
-    new Block(SQUARE_SIZE, new Point(0, 400)),
-    new Block(SQUARE_SIZE, new Point(100, 400)),
-    new Block(SQUARE_SIZE, new Point(200, 400)),
-    new Block(SQUARE_SIZE, new Point(200, 300)),
-    new Block(SQUARE_SIZE, new Point(400, 200)),
-    new Block(SQUARE_SIZE, new Point(300, 400)),
-    new Block(SQUARE_SIZE, new Point(400, 400)),
-    new Block(SQUARE_SIZE, new Point(100, 100)),
-]
+const blocks = Array.from({length: 20}, () => 
+    new Block(SQUARE_SIZE, new Point(100 * Math.floor(Math.random() * 9), 100 * Math.floor(Math.random() * 9)))
+)
 
 function getStyle(entity: Entity) {
     return {
@@ -45,7 +38,7 @@ function handleKeydown(event: KeyboardEvent) {
             player.startMovingRight();
             break;
         case 'ArrowUp':
-            player.startJumping();
+            player.startJumping(blocks);
             break;
     }
 }
