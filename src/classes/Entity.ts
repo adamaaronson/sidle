@@ -1,18 +1,19 @@
 import Point from "./Point";
 
-const ACCELERATION_OF_GRAVITY: Point = {x: 0, y: 1}
+const ACCELERATION_OF_GRAVITY = new Point(0, 1)
 
 class Entity {
     size: Point;
     position: Point;
-    color: string;
     velocity: Point;
     acceleration: Point;
+    color: string;
+    isGrounded: boolean = true;
     
     constructor(size: Point, position: Point, color?: string, velocity?: Point, acceleration?: Point) {
         this.size = size
         this.position = position
-        this.velocity = velocity ?? {x: 0, y: 0}
+        this.velocity = velocity ?? new Point(0, 0)
         this.acceleration = acceleration ?? ACCELERATION_OF_GRAVITY
         this.color = color ?? "green"
     }
@@ -41,23 +42,32 @@ class Entity {
         return this.position.y + this.size.y
     }
 
+    update(blocks: Entity[]) {
+        this.updatePosition()
+        this.updateVelocity()
+        this.handleCollisions(blocks)
+    }
+
     updatePosition() {
-        this.position.x += this.velocity.x;
-        this.position.y += this.velocity.y;
+        this.position.add(this.velocity)
     }
 
     updateVelocity() {
-        this.velocity.x += this.acceleration.x;
-        this.velocity.y += this.acceleration.y;
+        this.velocity.add(this.acceleration)
+        if (this.velocity.y > ACCELERATION_OF_GRAVITY.y) {
+            this.isGrounded = false;
+        }
     }
 
     handleCollisions(blocks: Entity[]) {
-        let shift: Point = {x: 0, y: 0}
+        let maxShift = new Point(0, 0)
 
         for (const block of blocks.filter(other => this.intersects(other))) {
+            let shift = new Point(0, 0)
+
             const overlap = this.getOverlap(block)
 
-            if (overlap.x > overlap.y) {
+            if (overlap.y < overlap.x && !this.isGrounded) {
                 // vertical collision
                 if (block.top > this.top) {
                     // hitting it from above
@@ -66,8 +76,7 @@ class Entity {
                     // hitting it from below
                     shift.y += overlap.y
                 }
-                    
-            } else {
+            } else if (overlap.x < overlap.y) {
                 // horizontal collision
                 if (this.velocity.x > 0) {
                     // hitting it from the left
@@ -77,24 +86,21 @@ class Entity {
                     shift.x += overlap.x
                 }
             }
+
+            maxShift = Point.extreme(maxShift, shift)
         }
 
-        this.position.x += shift.x
-        this.position.y += shift.y
+        // compensate for overlap
+        this.position.add(maxShift)
 
-        if (shift.y > 0 && this.velocity.y < 0) {
+        if (maxShift.y > 0 && this.velocity.y < 0) {
             // roofed
-            this.velocity.y = 0;
-        } else if (shift.y < 0 && this.velocity.y > 0) {
+            this.velocity.y = 0
+        } else if (maxShift.y < 0 && this.velocity.y > 0) {
             // grounded
-            this.velocity.y = 0;
+            this.velocity.y = 0
+            this.isGrounded = true
         }
-    }
-
-    update(blocks: Entity[]) {
-        this.updatePosition()
-        this.updateVelocity()
-        this.handleCollisions(blocks)
     }
 
     intersects(other: Entity) {

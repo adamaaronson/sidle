@@ -3,10 +3,10 @@ import Point from "./Point";
 
 export default class Block extends Entity {
     constructor(size: Point, position: Point, color?: string) {
-        super(size, position, color, {x: 0, y: 0}, {x: 0, y: 0})
+        super(size, position, color, new Point(0, 0), new Point(0, 0))
     }
 
-    update() {
+    override update(_blocks: Entity[]) {
         // do nothing
     }
 }

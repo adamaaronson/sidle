@@ -2,22 +2,29 @@ import { useEffect, useState } from 'react'
 import Block from '../classes/Block'
 import Entity from '../classes/Entity'
 import '../styles/TestGame.scss'
+import Point from '../classes/Point'
+import Player from '../classes/Player'
 
-const SQUARE_SIZE = {x: 100, y: 100}
-const INTERVAL_MILLISECONDS = 30
+const SQUARE_SIZE = new Point(100, 100)
+const FPS = 30
 
-const player = new Entity(
+const player = new Player(
+    undefined,
+    undefined,
     SQUARE_SIZE,
-    {x: 0, y: 0},
+    new Point(0, 0),
     "goldenrod"
 )
 
 const blocks = [
-    new Block(SQUARE_SIZE, {x: 0, y: 400}),
-    new Block(SQUARE_SIZE, {x: 100, y: 400}),
-    new Block(SQUARE_SIZE, {x: 200, y: 400}),
-    new Block(SQUARE_SIZE, {x: 300, y: 400}),
-    new Block(SQUARE_SIZE, {x: 400, y: 400}),
+    new Block(SQUARE_SIZE, new Point(0, 400)),
+    new Block(SQUARE_SIZE, new Point(100, 400)),
+    new Block(SQUARE_SIZE, new Point(200, 400)),
+    new Block(SQUARE_SIZE, new Point(200, 300)),
+    new Block(SQUARE_SIZE, new Point(400, 200)),
+    new Block(SQUARE_SIZE, new Point(300, 400)),
+    new Block(SQUARE_SIZE, new Point(400, 400)),
+    new Block(SQUARE_SIZE, new Point(100, 100)),
 ]
 
 function getStyle(entity: Entity) {
@@ -30,6 +37,31 @@ function getStyle(entity: Entity) {
     }
 }
 
+function handleKeydown(event: KeyboardEvent) {
+    switch (event.key) {
+        case 'ArrowLeft':
+            player.startMovingLeft();
+            break;
+        case 'ArrowRight':
+            player.startMovingRight();
+            break;
+        case 'ArrowUp':
+            player.startJumping();
+            break;
+    }
+}
+
+function handleKeyup(event: KeyboardEvent) {
+    switch (event.key) {
+        case 'ArrowLeft':
+            player.stopMovingLeft();
+            break;
+        case 'ArrowRight':
+            player.stopMovingRight();
+            break;
+    }
+}
+
 export default function TestGame() {
     const [, setFrame] = useState(0)
 
@@ -38,16 +70,22 @@ export default function TestGame() {
         ...blocks
     ]
 
-    const update = () => {
-        entities.forEach(e => e.update(blocks));
-    }
-
     useEffect(() => {
         setInterval(() => {
-            update();
+            entities.forEach(e => e.update(blocks));
             setFrame(frame => (frame + 1) % 256);
-        }, INTERVAL_MILLISECONDS)
+        }, 1000 / FPS)
     }, [])
+
+    useEffect(() => {
+        document.addEventListener('keydown', handleKeydown)
+        document.addEventListener('keyup', handleKeyup)
+
+        return () => {
+            document.removeEventListener('keydown', handleKeydown)
+            document.removeEventListener('keyup', handleKeyup)
+        }
+    })
 
     return <div className="test-game">
         <div className="game-grid">
