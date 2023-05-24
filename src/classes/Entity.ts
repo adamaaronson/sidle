@@ -59,6 +59,7 @@ class Entity {
 
         this.updatePosition(secondsElapsed, blocks)
         this.updateVelocity(secondsElapsed, blocks)
+        this.handleCollisions(blocks)
         
         this.lastUpdated = timestamp
     }
@@ -74,11 +75,11 @@ class Entity {
         this.position.add(ddAcceleration)
 
         if (pushedAgainstSide) {
-            this.position.x -= dVelocity.x
+            this.position.x -= dVelocity.x // undo change due to moving sideways into a wall
         }
 
         if (pushedAgainstFloor) {
-            this.position.y -= ddAcceleration.y
+            this.position.y -= ddAcceleration.y // undo change due to gravity into the floor
         }
 
         this.position.round()
@@ -92,7 +93,7 @@ class Entity {
         this.velocity.add(dAcceleration)
 
         if (pushedAgainstFloor) {
-            this.velocity.y -= dAcceleration.y
+            this.velocity.y -= dAcceleration.y // undo change due to gravity into the floor
         }
     }
 
@@ -137,6 +138,50 @@ class Entity {
         return blocks.some(block => 
             this.right === block.left && this.bottom > block.top && this.top < block.bottom
         )
+    }
+
+    handleCollisions(blocks: Entity[]) {
+        let maxShift = Point.zero()
+
+        for (const block of blocks.filter(other => this.intersects(other))) {
+            let shift = Point.zero()
+
+            const overlap = this.getOverlap(block)
+
+            if ((overlap.y < overlap.x) || 
+                (overlap.x < overlap.y && ((this.velocity.x >= 0 && block.left < this.left) || (this.velocity.x <= 0 && block.left > this.left)))) {
+                // vertical collision
+                if (block.top > this.top) {
+                    // hitting it from above
+                    shift.y -= overlap.y
+                } else {
+                    // hitting it from below
+                    shift.y += overlap.y
+                }
+            } else if (overlap.x < overlap.y) {
+                // horizontal collision
+                if (this.velocity.x > 0) {
+                    // hitting it from the left
+                    shift.x -= overlap.x
+                } else if (this.velocity.x < 0) {
+                    // hitting it from the right
+                    shift.x += overlap.x
+                }
+            }
+
+            maxShift = Point.extreme(maxShift, shift)
+        }
+
+        // compensate for overlap
+        this.position.add(maxShift)
+
+        if (maxShift.y > 0 && this.velocity.y < 0) {
+            // roofed
+            this.velocity.y = 0
+        } else if (maxShift.y < 0 && this.velocity.y > 0) {
+            // grounded
+            this.velocity.y = 0
+        }
     }
 }
 
