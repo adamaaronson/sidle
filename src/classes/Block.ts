@@ -1,9 +1,12 @@
 import Entity from "./Entity";
+import EntitySettings from "./EntitySettings";
 import Point from "./Point";
 
 export default class Block extends Entity {
-    constructor(size: Point, position: Point, color?: string) {
-        super(size, position, color, Point.zero(), Point.zero())
+    constructor(settings: EntitySettings) {
+        super(settings)
+        this.velocity = Point.zero()
+        this.acceleration = Point.zero()
     }
 
     override update(_timestamp: number, _blocks: Entity[]) {

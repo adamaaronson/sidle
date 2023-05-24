@@ -1,6 +1,6 @@
+import { GRAVITY, SQUARE_SIZE } from "./Defaults";
+import EntitySettings from "./EntitySettings";
 import Point from "./Point";
-
-const ACCELERATION_OF_GRAVITY = new Point(0, 500)
 
 class Entity {
     size: Point;
@@ -10,12 +10,13 @@ class Entity {
     color: string;
     lastUpdated: number;
     
-    constructor(size: Point, position: Point, color?: string, velocity?: Point, acceleration?: Point) {
-        this.size = size
-        this.position = position
-        this.velocity = velocity ?? Point.zero()
-        this.acceleration = acceleration ?? ACCELERATION_OF_GRAVITY
-        this.color = color ?? "green"
+    constructor(settings: EntitySettings) {
+        this.size = settings.size ?? SQUARE_SIZE
+        this.position = settings.position ?? Point.zero()
+        this.velocity = settings.velocity ?? Point.zero()
+        this.acceleration = settings.acceleration ?? new Point(0, GRAVITY)
+        this.color = settings.color ?? "green"
+
         this.lastUpdated = performance.now()
     }
 
@@ -41,6 +42,16 @@ class Entity {
 
     get bottom() {
         return this.position.y + this.size.y
+    }
+
+    get style() {
+        return {
+            top: this.top,
+            left: this.left,
+            width: this.width,
+            height: this.height,
+            backgroundColor: this.color
+        }
     }
 
     update(timestamp: number, blocks: Entity[]) {

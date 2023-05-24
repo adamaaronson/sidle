@@ -1,33 +1,19 @@
 import { useEffect, useState } from 'react'
 import Block from '../classes/Block'
-import Entity from '../classes/Entity'
 import '../styles/TestGame.scss'
 import Point from '../classes/Point'
 import Player from '../classes/Player'
 
-const SQUARE_SIZE = new Point(100, 100)
-
-const player = new Player(
-    undefined,
-    undefined,
-    new Point(50, 50),
-    Point.zero(),
-    "goldenrod"
-)
+const player = new Player({
+    position: Point.zero(),
+    color: "goldenrod"
+})
 
 const blocks = Array.from({length: 20}, () => 
-    new Block(SQUARE_SIZE, new Point(100 * Math.floor(Math.random() * 9), 100 * Math.floor(Math.random() * 9)))
+    new Block({
+        position: new Point(100 * Math.floor(Math.random() * 9), 100 * Math.floor(Math.random() * 9))
+    })
 )
-
-function getStyle(entity: Entity) {
-    return {
-        top: entity.top,
-        left: entity.left,
-        width: entity.width,
-        height: entity.height,
-        backgroundColor: entity.color
-    }
-}
 
 function handleKeydown(event: KeyboardEvent) {
     switch (event.key) {
@@ -58,7 +44,7 @@ function handleKeyup(event: KeyboardEvent) {
 }
 
 export default function TestGame() {
-    const [, setFrame] = useState(0)
+    const [, setTimestamp] = useState(0)
 
     const entities = [
         player,
@@ -67,8 +53,7 @@ export default function TestGame() {
 
     const gameLoop = (timestamp: number) => {
         entities.forEach(e => e.update(timestamp, blocks));
-
-        setFrame(frame => (frame + 1) % 256);
+        setTimestamp(timestamp);
 
         requestAnimationFrame(gameLoop)
     }
@@ -93,7 +78,7 @@ export default function TestGame() {
                 <div
                     className="entity"
                     key={index}
-                    style={getStyle(entity)}
+                    style={entity.style}
                 />
             )}
         </div>

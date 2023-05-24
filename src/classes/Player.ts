@@ -1,8 +1,7 @@
+import { JUMPING_SPEED, WALKING_SPEED } from "./Defaults";
 import Entity from "./Entity";
+import EntitySettings from "./EntitySettings";
 import Point from "./Point";
-
-const WALKING_SPEED = 200
-const JUMPING_SPEED = 450
 
 export default class Player extends Entity {
     walkingSpeed: number;
@@ -11,10 +10,10 @@ export default class Player extends Entity {
     isMovingRight: boolean = false;
     isJumping: boolean = false;
 
-    constructor(walkingSpeed?: number, jumpingSpeed?: number, ...args: ConstructorParameters<typeof Entity>) {
-        super(...args)
-        this.walkingSpeed = walkingSpeed ?? WALKING_SPEED
-        this.jumpingSpeed = jumpingSpeed ?? JUMPING_SPEED
+    constructor(settings: EntitySettings) {
+        super(settings)
+        this.walkingSpeed = settings.walkingSpeed ?? WALKING_SPEED
+        this.jumpingSpeed = settings.jumpingSpeed ?? JUMPING_SPEED
     }
 
     override update(timestamp: number, blocks: Entity[]) {
