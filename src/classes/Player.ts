@@ -17,9 +17,6 @@ export default class Player extends Entity {
     }
 
     override update(timestamp: number, blocks: Entity[]) {
-        if (this.position.y > 900 ) {
-            this.position = Point.zero()
-        }
         if (this.isJumping) {
             this.startJumping(blocks) // keep jumping if the up arrow is still held down
         }
