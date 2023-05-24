@@ -2,7 +2,7 @@ import Entity from "./Entity";
 import Point from "./Point";
 
 const WALKING_SPEED = 200
-const JUMPING_SPEED = 350
+const JUMPING_SPEED = 450
 
 export default class Player extends Entity {
     walkingSpeed: number;
@@ -18,6 +18,12 @@ export default class Player extends Entity {
     }
 
     override update(timestamp: number, blocks: Entity[]) {
+        if (this.position.y > 900 ) {
+            this.position = Point.zero()
+        }
+        if (this.isJumping) {
+            this.startJumping(blocks) // keep jumping if the up arrow is still held down
+        }
         super.update(timestamp, blocks)
         this.handleCollisions(blocks)
     }
@@ -43,10 +49,14 @@ export default class Player extends Entity {
     }
 
     startJumping(blocks: Entity[]) {
+        this.isJumping = true
         if (this.isBottomTouching(blocks)) {
             this.velocity.y = -this.jumpingSpeed
-            this.isJumping = true
         }
+    }
+
+    stopJumping() {
+        this.isJumping = false
     }
 
     handleCollisions(blocks: Entity[]) {

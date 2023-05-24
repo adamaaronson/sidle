@@ -10,7 +10,7 @@ const SQUARE_SIZE = new Point(100, 100)
 const player = new Player(
     undefined,
     undefined,
-    SQUARE_SIZE,
+    new Point(50, 50),
     Point.zero(),
     "goldenrod"
 )
@@ -50,6 +50,9 @@ function handleKeyup(event: KeyboardEvent) {
             break;
         case 'ArrowRight':
             player.stopMovingRight();
+            break;
+        case 'ArrowUp':
+            player.stopJumping();
             break;
     }
 }
