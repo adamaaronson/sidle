@@ -6,7 +6,6 @@ import Point from '../classes/Point'
 import Player from '../classes/Player'
 
 const SQUARE_SIZE = new Point(100, 100)
-const FPS = 30
 
 const player = new Player(
     undefined,
@@ -70,11 +69,16 @@ export default function TestGame() {
         ...blocks
     ]
 
+    const gameLoop = (timestamp: number) => {
+        entities.forEach(e => e.update(timestamp, blocks));
+
+        setFrame(frame => (frame + 1) % 256);
+
+        requestAnimationFrame(gameLoop)
+    }
+
     useEffect(() => {
-        setInterval(() => {
-            entities.forEach(e => e.update(blocks));
-            setFrame(frame => (frame + 1) % 256);
-        }, 1000 / FPS)
+        requestAnimationFrame(gameLoop)
     }, [])
 
     useEffect(() => {

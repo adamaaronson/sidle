@@ -1,7 +1,7 @@
 import Entity from "./Entity";
 
-const WALKING_SPEED = 10
-const JUMPING_SPEED = 15
+const WALKING_SPEED = 200
+const JUMPING_SPEED = 350
 
 export default class Player extends Entity {
     speed: number;

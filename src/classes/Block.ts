@@ -6,7 +6,7 @@ export default class Block extends Entity {
         super(size, position, color, new Point(0, 0), new Point(0, 0))
     }
 
-    override update(_blocks: Entity[]) {
+    override update(_timestamp: number, _blocks: Entity[]) {
         // do nothing
     }
 }

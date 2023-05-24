@@ -1,6 +1,6 @@
 import Point from "./Point";
 
-const ACCELERATION_OF_GRAVITY = new Point(0, 1)
+const ACCELERATION_OF_GRAVITY = new Point(0, 500)
 
 class Entity {
     size: Point;
@@ -8,6 +8,8 @@ class Entity {
     velocity: Point;
     acceleration: Point;
     color: string;
+    lastUpdated: number;
+
     isGrounded: boolean = true;
     
     constructor(size: Point, position: Point, color?: string, velocity?: Point, acceleration?: Point) {
@@ -16,6 +18,7 @@ class Entity {
         this.velocity = velocity ?? new Point(0, 0)
         this.acceleration = acceleration ?? ACCELERATION_OF_GRAVITY
         this.color = color ?? "green"
+        this.lastUpdated = performance.now()
     }
 
     get width() {
@@ -42,19 +45,22 @@ class Entity {
         return this.position.y + this.size.y
     }
 
-    update(blocks: Entity[]) {
-        this.updatePosition()
-        this.updateVelocity()
+    update(timestamp: number, blocks: Entity[]) {
+        const secondsElapsed = (timestamp - this.lastUpdated) / 1000
+        this.updatePosition(secondsElapsed)
+        this.updateVelocity(secondsElapsed)
         this.handleCollisions(blocks)
+        this.lastUpdated = timestamp
     }
 
-    updatePosition() {
-        this.position.add(this.velocity)
+    updatePosition(secondsElapsed: number) {
+        this.position.add(this.velocity.times(secondsElapsed))
+        this.position.add(this.acceleration.times(secondsElapsed ** 2).times(0.5))
     }
 
-    updateVelocity() {
-        this.velocity.add(this.acceleration)
-        if (this.velocity.y > ACCELERATION_OF_GRAVITY.y) {
+    updateVelocity(secondsElapsed: number) {
+        this.velocity.add(this.acceleration.times(secondsElapsed))
+        if (this.velocity.y > 0) {
             this.isGrounded = false;
         }
     }
@@ -67,7 +73,8 @@ class Entity {
 
             const overlap = this.getOverlap(block)
 
-            if (overlap.y < overlap.x && !this.isGrounded) {
+            if ((overlap.y < overlap.x && !this.isGrounded) || 
+                (overlap.x < overlap.y && ((this.velocity.x >= 0 && block.left < this.left) || (this.velocity.x <= 0 && block.left > this.left)))) {
                 // vertical collision
                 if (block.top > this.top) {
                     // hitting it from above
@@ -104,11 +111,11 @@ class Entity {
     }
 
     intersects(other: Entity) {
-        if (other.left > this.right || this.left > other.right) {
+        if (other.left >= this.right || this.left >= other.right) {
             return false // separate horizontally
         }
 
-        if (other.top > this.bottom || this.top > other.bottom) {
+        if (other.top >= this.bottom || this.top >= other.bottom) {
             return false // separate vertically
         }
 
