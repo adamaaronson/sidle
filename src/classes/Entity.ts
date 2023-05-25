@@ -67,6 +67,7 @@ class Entity {
     updatePosition(secondsElapsed: number, blocks: Entity[]) {
         const pushedAgainstSide = (this.velocity.x < 0 && this.isLeftTouching(blocks)) || (this.velocity.x > 0 && this.isRightTouching(blocks))
         const pushedAgainstFloor = (this.acceleration.y > 0 && this.isBottomTouching(blocks))
+        const pushedAgainstCeiling = (this.velocity.y < 0 && this.isTopTouching(blocks) && this.isBottomTouching(blocks))
 
         const dVelocity = this.velocity.times(secondsElapsed)
         const ddAcceleration = this.acceleration.times(secondsElapsed ** 2).times(0.5)
@@ -80,6 +81,10 @@ class Entity {
 
         if (pushedAgainstFloor) {
             this.position.y -= ddAcceleration.y // undo change due to gravity into the floor
+        }
+
+        if (pushedAgainstCeiling) {
+            this.position.y -= dVelocity.y // undo change due to pushing into ceiling
         }
 
         this.position.round()

@@ -9,11 +9,20 @@ const player = new Player({
     color: "goldenrod"
 })
 
-const blocks = Array.from({length: 20}, () => 
-    new Block({
-        position: new Point(100 * Math.floor(Math.random() * 9), 100 * Math.floor(Math.random() * 9))
-    })
-)
+// const blocks = Array.from({length: 20}, () => 
+//     new Block({
+//         position: new Point(100 * Math.floor(Math.random() * 9), 100 * Math.floor(Math.random() * 9))
+//     })
+// )
+
+const blocks = [
+    new Block({position: new Point(0, 700)}),
+    new Block({position: new Point(100, 700)}),
+    new Block({position: new Point(300, 800)}),
+    new Block({position: new Point(400, 800)}),
+    new Block({position: new Point(100, 500)}),
+    new Block({position: new Point(200, 500)}),
+]
 
 function handleKeydown(event: KeyboardEvent) {
     switch (event.key) {
