@@ -49,7 +49,10 @@ export default class Player extends Entity {
         }
     }
 
-    stopJumping() {
+    stopJumping(blocks: Entity[]) {
         this.isJumping = false
+        if (this.isBottomTouching(blocks)) {
+            this.velocity.y = 0
+        }
     }
 }
