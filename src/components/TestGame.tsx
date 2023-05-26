@@ -63,6 +63,9 @@ export default function TestGame() {
         ...blocks
     ]
 
+    // TODO: store the blocks in a smart way to fetch
+    // only the ones that are adjacent to the player for each update
+
     const gameLoop = (timestamp: number) => {
         entities.forEach(e => e.update(timestamp, blocks));
         setTimestamp(timestamp);
