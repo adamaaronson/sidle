@@ -19,16 +19,26 @@ export default class Player extends Entity {
         if (this.isJumping) {
             this.startJumping(blocks) // keep jumping if the up arrow is still held down
         }
+        if (this.isMovingLeft && !this.isMovingRight) {
+            this.startMovingLeft()
+        }
+        if (this.isMovingRight && !this.isMovingLeft) {
+            this.startMovingRight()
+        }
         super.update(timestamp, blocks)
     }
 
     startMovingLeft() {
-        this.velocity.x = -this.walkingSpeed
+        if (!this.inAHole) {
+            this.velocity.x = -this.walkingSpeed
+        }
         this.isMovingLeft = true
     }
 
     startMovingRight() {
-        this.velocity.x = this.walkingSpeed
+        if (!this.inAHole) {
+            this.velocity.x = this.walkingSpeed
+        }
         this.isMovingRight = true
     }
 

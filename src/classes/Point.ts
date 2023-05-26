@@ -12,13 +12,30 @@ export default class Point {
         this.y += other.y
     }
 
+    multiply(scalar: number) {
+        this.x *= scalar
+        this.y *= scalar
+    }
+
     round() {
         this.x = Math.round(this.x)
         this.y = Math.round(this.y)
     }
 
+    plus(other: Point) {
+        return new Point(this.x + other.x, this.y + other.y)
+    }
+
+    minus(other: Point) {
+        return new Point(this.x - other.x, this.y - other.y)
+    }
+
     times(scalar: number) {
         return new Point(this.x * scalar, this.y * scalar)
+    }
+
+    clone() {
+        return new Point(this.x, this.y)
     }
 
     static extreme(first: Point, second: Point) {

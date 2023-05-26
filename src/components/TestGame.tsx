@@ -6,15 +6,26 @@ import Player from '../classes/Player'
 
 const player = new Player({
     position: Point.zero(),
-    size: new Point(80, 80),
+    size: new Point(100, 100),
     color: "goldenrod"
 })
 
-const blocks = Array.from({length: 30}, () => 
+const blocks = Array.from({length: 20}, () => 
     new Block({
         position: new Point(100 * Math.floor(Math.random() * 9), 100 * Math.floor(Math.random() * 9))
     })
 )
+
+// const blocks = [
+//     new Block({position: new Point(100, 100)}),
+//     new Block({position: new Point(100, 300)}),
+//     new Block({position: new Point(0, 500)}),
+//     new Block({position: new Point(100, 500)}),
+//     new Block({position: new Point(200, 500)}),
+//     new Block({position: new Point(400, 500)}),
+//     new Block({position: new Point(300, 600)}),
+//     new Block({position: new Point(500, 500)}),
+// ]
 
 function handleKeydown(event: KeyboardEvent) {
     switch (event.key) {
