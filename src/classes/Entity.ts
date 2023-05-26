@@ -94,7 +94,13 @@ class Entity {
         }
         
         const initialPosition = this.position.minus(deltaPosition)
-        
+
+        // TODO: adjust for ceiling gaps in scenarios like this:
+        //
+        //    # #
+        //    
+        //  ########
+
         if (this.velocity.x !== 0 && !this.isLeftTouching(blocks) && !this.isRightTouching(blocks) && this.velocity.y >= 0) {
             this.adjustForFloorGaps(initialPosition.x, this.position.x, blocks)
         }
