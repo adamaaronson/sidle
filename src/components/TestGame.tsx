@@ -10,22 +10,26 @@ const player = new Player({
     color: "goldenrod"
 })
 
-const blocks = Array.from({length: 20}, () => 
-    new Block({
-        position: new Point(100 * Math.floor(Math.random() * 9), 100 * Math.floor(Math.random() * 9))
-    })
-)
+// const blocks = Array.from({length: 20}, () => 
+//     new Block({
+//         position: new Point(100 * Math.floor(Math.random() * 9), 100 * Math.floor(Math.random() * 9))
+//     })
+// )
 
-// const blocks = [
-//     new Block({position: new Point(100, 100)}),
-//     new Block({position: new Point(100, 300)}),
-//     new Block({position: new Point(0, 500)}),
-//     new Block({position: new Point(100, 500)}),
-//     new Block({position: new Point(200, 500)}),
-//     new Block({position: new Point(400, 500)}),
-//     new Block({position: new Point(300, 600)}),
-//     new Block({position: new Point(500, 500)}),
-// ]
+const blocks = [
+    new Block({position: new Point(100, 100)}),
+    new Block({position: new Point(100, 300)}),
+    new Block({position: new Point(0, 500)}),
+    new Block({position: new Point(100, 500)}),
+    new Block({position: new Point(200, 500)}),
+    new Block({position: new Point(400, 500)}),
+    new Block({position: new Point(300, 600)}),
+    new Block({position: new Point(500, 500)}),
+    new Block({position: new Point(600, 600)}),
+    new Block({position: new Point(700, 500)}),
+    new Block({position: new Point(700, 300)}),
+    new Block({position: new Point(300, 300)}),
+]
 
 function handleKeydown(event: KeyboardEvent) {
     switch (event.key) {

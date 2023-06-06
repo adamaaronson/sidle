@@ -10,6 +10,7 @@ class Entity {
     color: string;
     lastUpdated: number;
     inAHole?: Point;
+    immuneToHoles?: Point;
     
     constructor(settings: EntitySettings) {
         this.size = settings.size ?? SQUARE_SIZE
@@ -30,19 +31,19 @@ class Entity {
     }
 
     get left() {
-        return this.position.x
+        return Math.round(this.position.x)
     }
 
     get right() {
-        return this.position.x + this.size.x
+        return Math.round(this.position.x + this.size.x)
     }
 
     get top() {
-        return this.position.y
+        return Math.round(this.position.y)
     }
 
     get bottom() {
-        return this.position.y + this.size.y
+        return Math.round(this.position.y + this.size.y)
     }
 
     get style() {
@@ -58,9 +59,12 @@ class Entity {
     update(timestamp: number, blocks: Entity[]) {
         const secondsElapsed = (timestamp - this.lastUpdated) / 1000
 
+        const initialPosition = this.position.clone()
+
         this.updatePosition(secondsElapsed, blocks)
         this.updateVelocity(secondsElapsed, blocks)
         this.handleCollisions(blocks)
+        this.checkForGaps(initialPosition, blocks)
         
         this.lastUpdated = timestamp
     }
@@ -89,30 +93,42 @@ class Entity {
             this.position.y -= dVelocity.y // undo change due to pushing into ceiling
         }
 
-        if (this.inAHole && this.position.y > this.inAHole.y + this.height / 2) {
-            this.inAHole = undefined // no longer in a hole, since it's fallen enough
-        }
-        
-        const initialPosition = this.position.minus(deltaPosition)
-
-        // TODO: adjust for ceiling gaps in scenarios like this:
-        //
-        //    # #
-        //    
-        //  ########
-
-        if (this.velocity.x !== 0 && !this.isLeftTouching(blocks) && !this.isRightTouching(blocks) && this.velocity.y >= 0) {
-            this.adjustForFloorGaps(initialPosition.x, this.position.x, blocks)
-        }
-
-        if (this.velocity.y !== 0) {
-            this.adjustForWallGaps(initialPosition.y, this.position.y, blocks)
-        }
-
         this.position.round()
     }
 
-    adjustForWallGaps(initialY: number, finalY: number, blocks: Entity[]) {
+    checkForGaps(initialPosition: Point, blocks: Entity[]) {
+        let horizontalGapX = undefined;
+        let verticalGapY = undefined;
+
+        if (this.inAHole && Math.abs(this.position.y - this.inAHole.y) >= 1) {
+            this.inAHole = undefined // no longer in a hole, since it's fallen enough
+        }
+
+        if (this.immuneToHoles && Math.abs(initialPosition.x - this.immuneToHoles.x) >= 1) {
+            console.log(this.immuneToHoles, initialPosition, this.position)
+            this.immuneToHoles = undefined // not necessarily out of a hole, since it's moved laterally
+        }
+
+        if (!this.immuneToHoles && !this.isLeftTouching(blocks) && !this.isRightTouching(blocks)) {
+            horizontalGapX = this.checkForHorizontalGaps(initialPosition.x, this.position.x, blocks)
+        }
+
+        if (!this.isBottomTouching(blocks) && !this.isTopTouching(blocks)) {
+            verticalGapY = this.checkForVerticalGaps(initialPosition.y, this.position.y, blocks)
+        }
+
+        if (verticalGapY) {
+            this.position.y = verticalGapY;
+            this.velocity.y = 0;
+            this.immuneToHoles = this.position.clone(); // can't immediately be in a hole
+        } else if (horizontalGapX) {
+            this.position.x = horizontalGapX;
+            this.velocity.x = 0;
+            this.inAHole = this.position.clone(); // force entity to stop moving sideways
+        }
+    }
+
+    checkForVerticalGaps(initialY: number, finalY: number, blocks: Entity[]) {
         const minY = Math.ceil(Math.min(initialY, finalY)) - 1
         const maxY = Math.floor(Math.max(initialY, finalY)) + 1
 
@@ -128,51 +144,51 @@ class Entity {
             return;
         }
 
-        let hasGap = false;
+        let wallGapY = undefined;
 
         // adjust position if skipped over gap in the wall in between
         for (let y = minY; y <= maxY; y++) {
             this.position.y = y
-            if ((maxLeft && !this.isLeftTouching(blocks) || (!maxLeft && !this.isRightTouching(blocks)))) {
-                this.velocity.y = 0;
-                hasGap = true;
+            if ((maxLeft && !this.isLeftTouching(blocks)) || (maxRight && !this.isRightTouching(blocks))) {
+                wallGapY = y;
                 break;
             }
         }
-        if (!hasGap) {
-            this.position.y = finalY;
-        }
+        
+        this.position.y = finalY;
+        return wallGapY;
     }
 
-    adjustForFloorGaps(initialX: number, finalX: number, blocks: Entity[]) {
+    checkForHorizontalGaps(initialX: number, finalX: number, blocks: Entity[]) {
         const minX = Math.ceil(Math.min(initialX, finalX)) - 1
         const maxX = Math.floor(Math.max(initialX, finalX)) + 1
 
         // ensure that entity is touching bottom before and after
         this.position.x = minX
         const minBottom = this.isBottomPushing(blocks)
+        const minTop = this.isTopPushing(blocks)
         this.position.x = maxX
         const maxBottom = this.isBottomPushing(blocks)
-        if (!(minBottom && maxBottom)) {
+        const maxTop = this.isTopPushing(blocks)
+
+        if (!(minBottom && maxBottom) && !(minTop && maxTop)) {
             this.position.x = finalX;
             return;
         }
         
-        let hasGap = false;
+        let floorGapX = undefined;
 
         // adjust position if skipped over gap in the floor in between
         for (let x = minX; x <= maxX; x++) {
             this.position.x = x
-            if (!this.isBottomTouching(blocks)) {
-                this.velocity.x = 0;
-                this.inAHole = this.position.clone(); // force entity to stop moving sideways
-                hasGap = true;
+            if ((maxBottom && !this.isBottomTouching(blocks)) || (maxTop && !this.isTopTouching(blocks))) {
+                floorGapX = x;
                 break;
             }
         }
-        if (!hasGap) {
-            this.position.x = finalX;
-        }
+        
+        this.position.x = finalX;
+        return floorGapX;
     }
 
     updateVelocity(secondsElapsed: number, blocks: Entity[]) {
@@ -284,6 +300,8 @@ class Entity {
         if (maxShift.y > 0 && this.velocity.y < 0) {
             // roofed
             this.velocity.y = 0
+            this.immuneToHoles = this.position.clone();
+            console.log('roofed', this.immuneToHoles)
         } else if (maxShift.y < 0 && this.velocity.y > 0) {
             // grounded
             this.velocity.y = 0
