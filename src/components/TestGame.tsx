@@ -20,6 +20,7 @@ const blocks = [
     new Block({position: new Point(100, 100)}),
     new Block({position: new Point(100, 300)}),
     new Block({position: new Point(0, 500)}),
+    new Block({position: new Point(400, 0)}),
     new Block({position: new Point(100, 500)}),
     new Block({position: new Point(200, 500)}),
     new Block({position: new Point(400, 500)}),
