@@ -128,9 +128,7 @@ class Entity {
                 } else {
                     currentStep.y = 0 // doesn't matter, fall onto block
                 }
-            }
-
-            if (bottomLeftTouching && currentStep.x < 0) {
+            } else if (bottomLeftTouching && currentStep.x < 0) {
                 if (topLeftTouching && this.lastStep.isTall()) {
                     currentStep.y = 0 // fall into wall gap
                     step.y = 0
