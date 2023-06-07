@@ -10,7 +10,7 @@ class Entity {
     color: string;
 
     lastUpdated: number;
-    lastVelocity: Point;
+    lastStep: Point;
     
     constructor(settings: EntitySettings) {
         this.size = settings.size ?? SQUARE_SIZE
@@ -20,7 +20,7 @@ class Entity {
         this.color = settings.color ?? "green"
 
         this.lastUpdated = performance.now()
-        this.lastVelocity = this.velocity
+        this.lastStep = Point.zero()
     }
 
     get width() {
@@ -58,14 +58,12 @@ class Entity {
     }
 
     update(timestamp: number, blocks: Entity[]) {
-        // console.log(this.velocity)
         const secondsElapsed = (timestamp - this.lastUpdated) / 1000
 
         this.updatePosition(secondsElapsed, blocks)
         this.updateVelocity(secondsElapsed, blocks)
         
         this.lastUpdated = timestamp
-        this.lastVelocity = this.velocity.clone()
     }
 
     updatePosition(secondsElapsed: number, blocks: Entity[]) {
@@ -88,30 +86,67 @@ class Entity {
 
     // https://en.wikipedia.org/wiki/Digital_differential_analyzer_(graphics_algorithm)
     interpolatePosition(vector: Point, blocks: Entity[]) {
-        const width = Math.abs(vector.x)
-        const height = Math.abs(vector.y)
-        const size = width > height ? width : height
-
+        const size = vector.isWide() ? vector.width : vector.height
         const step = vector.dividedBy(size)
         let unroundedPosition = this.position.clone() // keep track of fractional pixels throughout interpolation
+        
         for (let i = 0; i < size; i++) {
             const currentStep = step.clone()
+
+            const rightTouching = this.isRightTouching(blocks)
+            const leftTouching = this.isLeftTouching(blocks)
+            const bottomTouching = this.isBottomTouching(blocks)
+            const topTouching = this.isTopTouching(blocks)
             
             // if moving into wall, stop doing that
-            if (this.isRightTouching(blocks) && step.x > 0) {
+            if (rightTouching && step.x > 0) {
                 currentStep.x = 0
-            } else if (this.isLeftTouching(blocks) && step.x < 0) {
+            } else if (leftTouching && step.x < 0) {
                 currentStep.x = 0
             }
             
             // if moving into floor or ceiling, stop doing that
-            if (this.isBottomTouching(blocks) && step.y > 0) {
+            if (bottomTouching && step.y > 0) {
                 currentStep.y = 0
-            } else if (this.isTopTouching(blocks) && step.y < 0) {
+            } else if (topTouching && step.y < 0) {
                 currentStep.y = 0
             }
 
+            const bottomRightTouching = !bottomTouching && !rightTouching && this.isBottomRightTouching(blocks)
+            const bottomLeftTouching = !bottomTouching && !leftTouching && this.isBottomLeftTouching(blocks)
+            const topRightTouching = !topTouching && !rightTouching && this.isTopRightTouching(blocks)
+            const topLeftTouching = !topTouching && !leftTouching && this.isTopLeftTouching(blocks)
+
+            // corner cases
+            if (bottomRightTouching && currentStep.x > 0) {
+                if (topRightTouching && this.lastStep.isTall()) {
+                    currentStep.y = 0 // fall into wall gap
+                    step.y = 0
+                } else if (bottomLeftTouching && this.lastStep.isWide()) {
+                    currentStep.x = 0 // walk into floor gap
+                    step.x = 0
+                } else {
+                    currentStep.y = 0 // doesn't matter, fall onto block
+                }
+            }
+
+            if (bottomLeftTouching && currentStep.x < 0) {
+                if (topLeftTouching && this.lastStep.isTall()) {
+                    currentStep.y = 0 // fall into wall gap
+                    step.y = 0
+                } else if (bottomRightTouching && this.lastStep.isWide()) {
+                    currentStep.x = 0 // walk into floor gap
+                    step.x = 0
+                } else {
+                    currentStep.y = 0 // doesn't matter, fall onto block
+                }
+            }
+
             unroundedPosition.add(currentStep)
+            if (!currentStep.rounded().isZero()) {
+                this.lastStep = currentStep.rounded()
+            }
+
             this.position = unroundedPosition.rounded()
         }
     }
@@ -146,25 +181,25 @@ class Entity {
 
     isTopLeftTouching(blocks: Entity[]) {
         return blocks.some(block => 
-            this.top === block.bottom && this.right === block.left
+            this.top === block.bottom && this.left === block.right
         )
     }
 
     isTopRightTouching(blocks: Entity[]) {
         return blocks.some(block => 
-            this.top === block.bottom && this.left === block.right
+            this.top === block.bottom && this.right === block.left
         )
     }
 
     isBottomLeftTouching(blocks: Entity[]) {
         return blocks.some(block => 
-            this.top === block.bottom && this.right === block.left
+            this.bottom === block.top && this.left === block.right
         )
     }
 
     isBottomRightTouching(blocks: Entity[]) {
         return blocks.some(block => 
-            this.top === block.bottom && this.left === block.right
+            this.bottom === block.top && this.right === block.left
         )
     }
 }

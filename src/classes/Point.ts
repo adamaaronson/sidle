@@ -7,16 +7,24 @@ export default class Point {
         this.y = y;
     }
 
+    get width() {
+        return Math.abs(this.x)
+    }
+
+    get height() {
+        return Math.abs(this.y)
+    }
+
+    isWide() {
+        return this.width >= this.height
+    }
+
+    isTall() {
+        return this.height > this.width
+    }
+
     add(other: Point) {
         this.x += other.x
-        this.y += other.y
-    }
-
-    addX(other: Point) {
-        this.x += other.x
-    }
-
-    addY(other: Point) {
         this.y += other.y
     }
 
@@ -56,6 +64,20 @@ export default class Point {
 
     clone() {
         return new Point(this.x, this.y)
+    }
+
+    getBiggerDimension() {
+        const width = Math.abs(this.x)
+        const height = Math.abs(this.y)
+        if (width > height) {
+            return this.x
+        } else {
+            return this.y
+        }
+    }
+
+    isZero() {
+        return this.x === 0 && this.y === 0
     }
 
     static zero() {
