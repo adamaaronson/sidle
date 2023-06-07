@@ -8,9 +8,9 @@ class Entity {
     velocity: Point;
     acceleration: Point;
     color: string;
+
     lastUpdated: number;
-    inAHole?: Point;
-    immuneToHoles?: Point;
+    lastStep: Point;
     
     constructor(settings: EntitySettings) {
         this.size = settings.size ?? SQUARE_SIZE
@@ -20,6 +20,7 @@ class Entity {
         this.color = settings.color ?? "green"
 
         this.lastUpdated = performance.now()
+        this.lastStep = Point.zero()
     }
 
     get width() {
@@ -59,168 +60,98 @@ class Entity {
     update(timestamp: number, blocks: Entity[]) {
         const secondsElapsed = (timestamp - this.lastUpdated) / 1000
 
-        const initialPosition = this.position.clone()
-
         this.updatePosition(secondsElapsed, blocks)
         this.updateVelocity(secondsElapsed, blocks)
-        this.handleCollisions(blocks)
-        this.checkForGaps(initialPosition, blocks)
         
         this.lastUpdated = timestamp
     }
 
     updatePosition(secondsElapsed: number, blocks: Entity[]) {
-        const dVelocity = this.velocity.times(secondsElapsed)
-        const ddAcceleration = this.acceleration.times(secondsElapsed ** 2).times(0.5)
-        const deltaPosition = dVelocity.plus(ddAcceleration)
-
-        const wasLeftPushing = this.isLeftPushing(blocks)
-        const wasRightPushing = this.isRightPushing(blocks)
-        const wasBottomPushing = this.isBottomPushing(blocks)
-        const wasTopPushing = this.isTopPushing(blocks)
-
-        this.position.add(deltaPosition)
-
-        if (wasLeftPushing || wasRightPushing) {
-            this.position.x -= dVelocity.x // undo change due to moving sideways into a wall
-        }
-
-        if (wasBottomPushing) {
-            this.position.y -= ddAcceleration.y // undo change due to gravity into the floor
-        }
-
-        if (wasTopPushing) {
-            this.position.y -= dVelocity.y // undo change due to pushing into ceiling
-        }
-
-        this.position.round()
-    }
-
-    checkForGaps(initialPosition: Point, blocks: Entity[]) {
-        let horizontalGapX = undefined;
-        let verticalGapY = undefined;
-
-        if (this.inAHole && Math.abs(this.position.y - this.inAHole.y) >= 1) {
-            this.inAHole = undefined // no longer in a hole, since it's fallen enough
-        }
-
-        if (this.immuneToHoles && Math.abs(initialPosition.x - this.immuneToHoles.x) >= 1) {
-            console.log(this.immuneToHoles, initialPosition, this.position)
-            this.immuneToHoles = undefined // not necessarily out of a hole, since it's moved laterally
-        }
-
-        if (!this.immuneToHoles && !this.isLeftTouching(blocks) && !this.isRightTouching(blocks)) {
-            horizontalGapX = this.checkForHorizontalGaps(initialPosition.x, this.position.x, blocks)
-        }
-
-        if (!this.isBottomTouching(blocks) && !this.isTopTouching(blocks)) {
-            verticalGapY = this.checkForVerticalGaps(initialPosition.y, this.position.y, blocks)
-        }
-
-        if (verticalGapY) {
-            this.position.y = verticalGapY;
-            this.velocity.y = 0;
-            this.immuneToHoles = this.position.clone(); // can't immediately be in a hole
-        } else if (horizontalGapX) {
-            this.position.x = horizontalGapX;
-            this.velocity.x = 0;
-            this.inAHole = this.position.clone(); // force entity to stop moving sideways
-        }
-    }
-
-    checkForVerticalGaps(initialY: number, finalY: number, blocks: Entity[]) {
-        const minY = Math.ceil(Math.min(initialY, finalY)) - 1
-        const maxY = Math.floor(Math.max(initialY, finalY)) + 1
-
-        // ensure that entity is pushing against wall before and after
-        this.position.y = minY
-        const minLeft = this.isLeftPushing(blocks)
-        const minRight = this.isRightPushing(blocks)
-        this.position.y = maxY
-        const maxLeft = this.isLeftPushing(blocks)
-        const maxRight = this.isRightPushing(blocks)
-        if (!(minLeft && maxLeft) && !(minRight && maxRight)) {
-            this.position.y = finalY;
-            return;
-        }
-
-        let wallGapY = undefined;
-
-        // adjust position if skipped over gap in the wall in between
-        for (let y = minY; y <= maxY; y++) {
-            this.position.y = y
-            if ((maxLeft && !this.isLeftTouching(blocks)) || (maxRight && !this.isRightTouching(blocks))) {
-                wallGapY = y;
-                break;
-            }
-        }
-        
-        this.position.y = finalY;
-        return wallGapY;
-    }
-
-    checkForHorizontalGaps(initialX: number, finalX: number, blocks: Entity[]) {
-        const minX = Math.ceil(Math.min(initialX, finalX)) - 1
-        const maxX = Math.floor(Math.max(initialX, finalX)) + 1
-
-        // ensure that entity is touching bottom before and after
-        this.position.x = minX
-        const minBottom = this.isBottomPushing(blocks)
-        const minTop = this.isTopPushing(blocks)
-        this.position.x = maxX
-        const maxBottom = this.isBottomPushing(blocks)
-        const maxTop = this.isTopPushing(blocks)
-
-        if (!(minBottom && maxBottom) && !(minTop && maxTop)) {
-            this.position.x = finalX;
-            return;
-        }
-        
-        let floorGapX = undefined;
-
-        // adjust position if skipped over gap in the floor in between
-        for (let x = minX; x <= maxX; x++) {
-            this.position.x = x
-            if ((maxBottom && !this.isBottomTouching(blocks)) || (maxTop && !this.isTopTouching(blocks))) {
-                floorGapX = x;
-                break;
-            }
-        }
-        
-        this.position.x = finalX;
-        return floorGapX;
+        const dVelocity = this.velocity.times(secondsElapsed).rounded()
+        this.interpolatePosition(dVelocity, blocks)
     }
 
     updateVelocity(secondsElapsed: number, blocks: Entity[]) {
         const dAcceleration = this.acceleration.times(secondsElapsed)
-
-        const pushedAgainstFloor = (this.velocity.y >= 0 && this.isBottomTouching(blocks))
-
         this.velocity.add(dAcceleration)
 
-        if (pushedAgainstFloor) {
-            this.velocity.y -= dAcceleration.y // undo change due to gravity into the floor
+        if (this.velocity.y > 0 && this.isBottomTouching(blocks)) {
+            this.velocity.y = 0
+        }
+
+        if (this.velocity.y < 0 && this.isTopTouching(blocks)) {
+            this.velocity.y = 0
         }
     }
 
-    intersects(other: Entity) {
-        if (other.left >= this.right || this.left >= other.right) {
-            return false // separate horizontally
-        }
+    // https://en.wikipedia.org/wiki/Digital_differential_analyzer_(graphics_algorithm)
+    interpolatePosition(vector: Point, blocks: Entity[]) {
+        const size = vector.isWide() ? vector.width : vector.height
+        const step = vector.dividedBy(size)
+        let unroundedPosition = this.position.clone() // keep track of fractional pixels throughout interpolation
+        
+        for (let i = 0; i < size; i++) {
+            const currentStep = step.clone()
 
-        if (other.top >= this.bottom || this.top >= other.bottom) {
-            return false // separate vertically
-        }
+            const rightTouching = this.isRightTouching(blocks)
+            const leftTouching = this.isLeftTouching(blocks)
+            const bottomTouching = this.isBottomTouching(blocks)
+            const topTouching = this.isTopTouching(blocks)
+            
+            // if moving into wall, stop doing that
+            if (rightTouching && step.x > 0) {
+                currentStep.x = 0
+            } else if (leftTouching && step.x < 0) {
+                currentStep.x = 0
+            }
+            
+            // if moving into floor or ceiling, stop doing that
+            if (bottomTouching && step.y > 0) {
+                currentStep.y = 0
+            } else if (topTouching && step.y < 0) {
+                currentStep.y = 0
+            }
 
-        return true
+            const bottomRightTouching = !bottomTouching && !rightTouching && this.isBottomRightTouching(blocks)
+            const bottomLeftTouching = !bottomTouching && !leftTouching && this.isBottomLeftTouching(blocks)
+            const topRightTouching = !topTouching && !rightTouching && this.isTopRightTouching(blocks)
+            const topLeftTouching = !topTouching && !leftTouching && this.isTopLeftTouching(blocks)
+
+            // corner cases
+            if (bottomRightTouching && currentStep.x > 0) {
+                if (topRightTouching && this.lastStep.isTall()) {
+                    currentStep.y = 0 // fall into wall gap
+                    step.y = 0
+                } else if (bottomLeftTouching && this.lastStep.isWide()) {
+                    currentStep.x = 0 // walk into floor gap
+                    step.x = 0
+                } else {
+                    currentStep.y = 0 // doesn't matter, fall onto block
+                }
+            }
+
+            if (bottomLeftTouching && currentStep.x < 0) {
+                if (topLeftTouching && this.lastStep.isTall()) {
+                    currentStep.y = 0 // fall into wall gap
+                    step.y = 0
+                } else if (bottomRightTouching && this.lastStep.isWide()) {
+                    currentStep.x = 0 // walk into floor gap
+                    step.x = 0
+                } else {
+                    currentStep.y = 0 // doesn't matter, fall onto block
+                }
+            }
+
+            unroundedPosition.add(currentStep)
+            if (!currentStep.rounded().isZero()) {
+                this.lastStep = currentStep.rounded()
+            }
+
+            this.position = unroundedPosition.rounded()
+        }
     }
 
-    getOverlap(other: Entity) {
-        return <Point>{
-            x: Math.min(this.right, other.right) - Math.max(this.left, other.left),
-            y: Math.min(this.bottom, other.bottom) - Math.max(this.top, other.top)
-        }
-    }
+    // Edge touching block
 
     isTopTouching(blocks: Entity[]) {
         return blocks.some(block => 
@@ -246,66 +177,30 @@ class Entity {
         )
     }
 
-    isTopPushing(blocks: Entity[]) {
-        return this.velocity.y < 0 && this.isTopTouching(blocks) && this.isBottomTouching(blocks)
+    // Corner touching block
+
+    isTopLeftTouching(blocks: Entity[]) {
+        return blocks.some(block => 
+            this.top === block.bottom && this.left === block.right
+        )
     }
 
-    isBottomPushing(blocks: Entity[]) {
-        return this.velocity.y >= 0 && this.isBottomTouching(blocks)
+    isTopRightTouching(blocks: Entity[]) {
+        return blocks.some(block => 
+            this.top === block.bottom && this.right === block.left
+        )
     }
 
-    isLeftPushing(blocks: Entity[]) {
-        return this.velocity.x < 0 && this.isLeftTouching(blocks)
+    isBottomLeftTouching(blocks: Entity[]) {
+        return blocks.some(block => 
+            this.bottom === block.top && this.left === block.right
+        )
     }
 
-    isRightPushing(blocks: Entity[]) {
-        return this.velocity.x > 0 && this.isRightTouching(blocks)
-    }
-
-    handleCollisions(blocks: Entity[]) {
-        let maxShift = Point.zero()
-
-        for (const block of blocks.filter(other => this.intersects(other))) {
-            let shift = Point.zero()
-
-            const overlap = this.getOverlap(block)
-
-            if ((overlap.y < overlap.x) || 
-                (overlap.x < overlap.y && ((this.velocity.x >= 0 && block.left < this.left) || (this.velocity.x <= 0 && block.left > this.left)))) {
-                // vertical collision
-                if (block.top > this.top) {
-                    // hitting it from above
-                    shift.y -= overlap.y
-                } else {
-                    // hitting it from below
-                    shift.y += overlap.y
-                }
-            } else if (overlap.x < overlap.y) {
-                // horizontal collision
-                if (this.velocity.x > 0) {
-                    // hitting it from the left
-                    shift.x -= overlap.x
-                } else if (this.velocity.x < 0) {
-                    // hitting it from the right
-                    shift.x += overlap.x
-                }
-            }
-
-            maxShift = Point.extreme(maxShift, shift)
-        }
-
-        // compensate for overlap
-        this.position.add(maxShift)
-
-        if (maxShift.y > 0 && this.velocity.y < 0) {
-            // roofed
-            this.velocity.y = 0
-            this.immuneToHoles = this.position.clone();
-            console.log('roofed', this.immuneToHoles)
-        } else if (maxShift.y < 0 && this.velocity.y > 0) {
-            // grounded
-            this.velocity.y = 0
-        }
+    isBottomRightTouching(blocks: Entity[]) {
+        return blocks.some(block => 
+            this.bottom === block.top && this.right === block.left
+        )
     }
 }
 

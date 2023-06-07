@@ -29,16 +29,12 @@ export default class Player extends Entity {
     }
 
     startMovingLeft() {
-        if (!this.inAHole) {
-            this.velocity.x = -this.walkingSpeed
-        }
+        this.velocity.x = -this.walkingSpeed
         this.isMovingLeft = true
     }
 
     startMovingRight() {
-        if (!this.inAHole) {
-            this.velocity.x = this.walkingSpeed
-        }
+        this.velocity.x = this.walkingSpeed
         this.isMovingRight = true
     }
 
@@ -54,7 +50,7 @@ export default class Player extends Entity {
 
     startJumping(blocks: Entity[]) {
         this.isJumping = true
-        if (this.isBottomTouching(blocks)) {
+        if (this.isBottomTouching(blocks) && this.velocity.y === 0) {
             this.velocity.y = -this.jumpingSpeed
         }
     }
