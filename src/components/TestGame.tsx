@@ -32,6 +32,18 @@ const blocks = [
     new Block({position: new Point(300, 300)}),
 ]
 
+// const blocks = [
+//     new Block({position: new Point(0, 200)}),
+//     new Block({position: new Point(100, 200)}),
+//     new Block({position: new Point(300, 200)}),
+//     new Block({position: new Point(400, 200)}),
+//     new Block({position: new Point(100, 400)}),
+//     new Block({position: new Point(300, 400)}),
+//     new Block({position: new Point(400, 400)}),
+//     new Block({position: new Point(200, 0)}),
+//     new Block({position: new Point(200, 500)}),
+// ]
+
 function handleKeydown(event: KeyboardEvent) {
     switch (event.key) {
         case 'ArrowLeft':
@@ -94,6 +106,7 @@ export default function TestGame() {
 
     return <div className="test-game">
         <div className="game-grid">
+            {/* {entities.concat(...player.path).map((entity, index) =>  */}
             {entities.map((entity, index) => 
                 <div
                     className="entity"

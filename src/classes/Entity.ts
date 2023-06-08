@@ -10,7 +10,7 @@ class Entity {
     color: string;
 
     lastUpdated: number;
-    lastStep: Point;
+    previousStep: Point;
     
     constructor(settings: EntitySettings) {
         this.size = settings.size ?? SQUARE_SIZE
@@ -20,7 +20,7 @@ class Entity {
         this.color = settings.color ?? "green"
 
         this.lastUpdated = performance.now()
-        this.lastStep = Point.zero()
+        this.previousStep = Point.zero()
     }
 
     get width() {
@@ -76,11 +76,11 @@ class Entity {
         this.velocity.add(dAcceleration)
 
         if (this.velocity.y > 0 && this.isBottomTouching(blocks)) {
-            this.velocity.y = 0
+            this.velocity.y = 0 // stop moving if on the ground
         }
 
         if (this.velocity.y < 0 && this.isTopTouching(blocks)) {
-            this.velocity.y = 0
+            this.velocity.y = 0 // stop moving if on the ceiling
         }
     }
 
@@ -97,6 +97,11 @@ class Entity {
             const leftTouching = this.isLeftTouching(blocks)
             const bottomTouching = this.isBottomTouching(blocks)
             const topTouching = this.isTopTouching(blocks)
+
+            const bottomRightTouching = !bottomTouching && !rightTouching && this.isBottomRightTouching(blocks)
+            const bottomLeftTouching = !bottomTouching && !leftTouching && this.isBottomLeftTouching(blocks)
+            const topRightTouching = !topTouching && !rightTouching && this.isTopRightTouching(blocks)
+            const topLeftTouching = !topTouching && !leftTouching && this.isTopLeftTouching(blocks)
             
             // if moving into wall, stop doing that
             if (rightTouching && step.x > 0) {
@@ -112,40 +117,42 @@ class Entity {
                 currentStep.y = 0
             }
 
-            const bottomRightTouching = !bottomTouching && !rightTouching && this.isBottomRightTouching(blocks)
-            const bottomLeftTouching = !bottomTouching && !leftTouching && this.isBottomLeftTouching(blocks)
-            const topRightTouching = !topTouching && !rightTouching && this.isTopRightTouching(blocks)
-            const topLeftTouching = !topTouching && !leftTouching && this.isTopLeftTouching(blocks)
-
-            // corner cases
+            // if moving into a corner, decide whether to go vertically or horizontally
             if (bottomRightTouching && currentStep.x > 0) {
-                if (topRightTouching && this.lastStep.isTall()) {
+                if (topRightTouching && this.previousStep.isTall()) {
                     currentStep.y = 0 // fall into wall gap
                     step.y = 0
-                } else if (bottomLeftTouching && this.lastStep.isWide()) {
+                } else if (bottomLeftTouching && this.previousStep.isWide()) {
                     currentStep.x = 0 // walk into floor gap
                     step.x = 0
                 } else {
                     currentStep.y = 0 // doesn't matter, fall onto block
                 }
             } else if (bottomLeftTouching && currentStep.x < 0) {
-                if (topLeftTouching && this.lastStep.isTall()) {
+                if (topLeftTouching && this.previousStep.isTall()) {
                     currentStep.y = 0 // fall into wall gap
                     step.y = 0
-                } else if (bottomRightTouching && this.lastStep.isWide()) {
+                } else if (bottomRightTouching && this.previousStep.isWide()) {
                     currentStep.x = 0 // walk into floor gap
                     step.x = 0
                 } else {
                     currentStep.y = 0 // doesn't matter, fall onto block
                 }
+            } else if (topRightTouching && currentStep.x > 0 && currentStep.y < 0) {
+                currentStep.x = 0 // doesn't matter, hit side of block
+            } else if (topLeftTouching && currentStep.x < 0 && currentStep.y < 0) {
+                currentStep.x = 0 // doesn't matter, hit side of block
             }
 
             unroundedPosition.add(currentStep)
-            if (!currentStep.rounded().isZero()) {
-                this.lastStep = currentStep.rounded()
+
+            const nextPosition = unroundedPosition.rounded()
+            const delta = nextPosition.minus(this.position)
+            if (!delta.isZero()) {
+                this.previousStep = delta
             }
 
-            this.position = unroundedPosition.rounded()
+            this.position = nextPosition
         }
     }
 
