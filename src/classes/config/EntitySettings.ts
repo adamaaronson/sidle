@@ -1,4 +1,4 @@
-import Point from "./Point";
+import Point from "../game/Point";
 
 type EntitySettings = {
     size?: Point;

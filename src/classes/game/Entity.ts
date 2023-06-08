@@ -1,5 +1,5 @@
-import { GRAVITY, SQUARE_SIZE } from "./Defaults";
-import EntitySettings from "./EntitySettings";
+import { GRAVITY, SQUARE_SIZE } from "../config/Defaults";
+import EntitySettings from "../config/EntitySettings";
 import Point from "./Point";
 
 class Entity {

@@ -1,4 +1,4 @@
-import Point from "./Point";
+import Point from "../game/Point";
 
 export const SQUARE_SIZE = new Point(100, 100);
 export const GRAVITY = 700;
