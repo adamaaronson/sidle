@@ -3,6 +3,7 @@ import '../styles/TestGame.scss'
 import Block from '../classes/game/Block'
 import Point from '../classes/game/Point'
 import Player from '../classes/game/Player'
+import Level from '../classes/game/Level'
 
 const player = new Player({
     position: Point.zero(),
@@ -16,21 +17,7 @@ const blocks = Array.from({length: 20}, () =>
     })
 )
 
-// const blocks = [
-//     new Block({position: new Point(100, 100)}),
-//     new Block({position: new Point(100, 300)}),
-//     new Block({position: new Point(0, 500)}),
-//     new Block({position: new Point(400, 0)}),
-//     new Block({position: new Point(100, 500)}),
-//     new Block({position: new Point(200, 500)}),
-//     new Block({position: new Point(400, 500)}),
-//     new Block({position: new Point(300, 600)}),
-//     new Block({position: new Point(500, 500)}),
-//     new Block({position: new Point(600, 600)}),
-//     new Block({position: new Point(700, 500)}),
-//     new Block({position: new Point(700, 300)}),
-//     new Block({position: new Point(300, 300)}),
-// ]
+const level = new Level(player, blocks)
 
 function handleKeydown(event: KeyboardEvent) {
     switch (event.key) {
@@ -63,17 +50,12 @@ function handleKeyup(event: KeyboardEvent) {
 export default function TestGame() {
     const [, setTimestamp] = useState(0)
 
-    const entities = [
-        player,
-        ...blocks
-    ]
-
     // TODO: store the blocks in a smart way to fetch
     // only the ones that are adjacent to the player for each update
 
     const gameLoop = (timestamp: number) => {
-        entities.forEach(e => e.update(timestamp, blocks));
-        setTimestamp(timestamp);
+        level.update(timestamp)
+        setTimestamp(timestamp)
 
         requestAnimationFrame(gameLoop)
     }
@@ -94,8 +76,7 @@ export default function TestGame() {
 
     return <div className="test-game">
         <div className="game-grid">
-            {/* {entities.concat(...player.path).map((entity, index) =>  */}
-            {entities.map((entity, index) => 
+            {level.entities.map((entity, index) => 
                 <div
                     className="entity"
                     key={index}
