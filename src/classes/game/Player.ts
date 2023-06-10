@@ -50,14 +50,14 @@ export default class Player extends Entity {
 
     startJumping(blocks: Entity[]) {
         this.isJumping = true
-        if (this.isBottomTouching(blocks) && this.velocity.y === 0) {
+        if (this.isBottomTouchingAny(blocks) && this.velocity.y === 0) {
             this.velocity.y = -this.jumpingSpeed
         }
     }
 
     stopJumping(blocks: Entity[]) {
         this.isJumping = false
-        if (this.isBottomTouching(blocks)) {
+        if (this.isBottomTouchingAny(blocks)) {
             this.velocity.y = 0
         }
     }

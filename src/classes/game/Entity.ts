@@ -75,11 +75,11 @@ class Entity {
         const dAcceleration = this.acceleration.times(secondsElapsed)
         this.velocity.add(dAcceleration)
 
-        if (this.velocity.y > 0 && this.isBottomTouching(blocks)) {
+        if (this.velocity.y > 0 && this.isBottomTouchingAny(blocks)) {
             this.velocity.y = 0 // stop moving if on the ground
         }
 
-        if (this.velocity.y < 0 && this.isTopTouching(blocks)) {
+        if (this.velocity.y < 0 && this.isTopTouchingAny(blocks)) {
             this.velocity.y = 0 // stop moving if on the ceiling
         }
     }
@@ -93,10 +93,10 @@ class Entity {
         for (let i = 0; i < size; i++) {
             const currentStep = step.clone()
 
-            const rightTouching = this.isRightTouching(blocks)
-            const leftTouching = this.isLeftTouching(blocks)
-            const bottomTouching = this.isBottomTouching(blocks)
-            const topTouching = this.isTopTouching(blocks)
+            const rightTouching = this.isRightTouchingAny(blocks)
+            const leftTouching = this.isLeftTouchingAny(blocks)
+            const bottomTouching = this.isBottomTouchingAny(blocks)
+            const topTouching = this.isTopTouchingAny(blocks)
 
             const bottomRightTouching = !bottomTouching && !rightTouching && this.isBottomRightTouching(blocks)
             const bottomLeftTouching = !bottomTouching && !leftTouching && this.isBottomLeftTouching(blocks)
@@ -121,20 +121,16 @@ class Entity {
             if (bottomRightTouching && currentStep.x > 0) {
                 if (topRightTouching && this.previousStep.isTall()) {
                     currentStep.y = 0 // fall into wall gap
-                    step.y = 0
                 } else if (bottomLeftTouching && this.previousStep.isWide()) {
                     currentStep.x = 0 // walk into floor gap
-                    step.x = 0
                 } else {
                     currentStep.y = 0 // doesn't matter, fall onto block
                 }
             } else if (bottomLeftTouching && currentStep.x < 0) {
                 if (topLeftTouching && this.previousStep.isTall()) {
                     currentStep.y = 0 // fall into wall gap
-                    step.y = 0
                 } else if (bottomRightTouching && this.previousStep.isWide()) {
                     currentStep.x = 0 // walk into floor gap
-                    step.x = 0
                 } else {
                     currentStep.y = 0 // doesn't matter, fall onto block
                 }
@@ -158,25 +154,50 @@ class Entity {
 
     // Edge touching block
 
-    isTopTouching(blocks: Entity[]) {
+    isTopTouching(block: Entity) {
+        return this.top === block.bottom && this.right > block.left && this.left < block.right
+    }
+
+    isBottomTouching(block: Entity) {
+        return this.bottom === block.top && this.right > block.left && this.left < block.right
+    }
+
+    isLeftTouching(block: Entity) {
+        return this.left === block.right && this.bottom > block.top && this.top < block.bottom   
+    }
+
+    isRightTouching(block: Entity) {
+        return this.right === block.left && this.bottom > block.top && this.top < block.bottom
+    }
+
+    getTouching(blocks: Entity[]) {
+        return blocks.filter(block =>
+            this.isTopTouching(block) ||
+            this.isBottomTouching(block) ||
+            this.isLeftTouching(block) ||
+            this.isRightTouching(block)
+        )
+    }
+
+    isTopTouchingAny(blocks: Entity[]) {
         return blocks.some(block => 
             this.top === block.bottom && this.right > block.left && this.left < block.right
         )
     }
 
-    isBottomTouching(blocks: Entity[]) {
+    isBottomTouchingAny(blocks: Entity[]) {
         return blocks.some(block => 
             this.bottom === block.top && this.right > block.left && this.left < block.right
         )
     }
 
-    isLeftTouching(blocks: Entity[]) {
+    isLeftTouchingAny(blocks: Entity[]) {
         return blocks.some(block => 
             this.left === block.right && this.bottom > block.top && this.top < block.bottom
         )
     }
 
-    isRightTouching(blocks: Entity[]) {
+    isRightTouchingAny(blocks: Entity[]) {
         return blocks.some(block => 
             this.right === block.left && this.bottom > block.top && this.top < block.bottom
         )
