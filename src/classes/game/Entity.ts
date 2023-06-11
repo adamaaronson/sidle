@@ -47,6 +47,13 @@ class Entity {
         return Math.round(this.position.y + this.size.y)
     }
 
+    get center() {
+        return new Point(
+            Math.round(this.position.x + this.size.x / 2),
+            Math.round(this.position.y + this.size.y / 2)
+        )
+    }
+
     get style() {
         return {
             top: this.top,

@@ -11,7 +11,7 @@ const player = new Player({
     color: "goldenrod"
 })
 
-const blocks = Array.from({length: 20}, () => 
+const blocks = Array.from({length: 40}, () => 
     new Block({
         position: new Point(100 * Math.floor(Math.random() * 9), 100 * Math.floor(Math.random() * 9))
     })
@@ -80,7 +80,7 @@ export default function TestGame() {
                 <div
                     className="entity"
                     key={index}
-                    style={entity.style}
+                    style={level.getEntityStyle(entity, new Point(500, 500), new Point(200, 300))}
                 />
             )}
         </div>
