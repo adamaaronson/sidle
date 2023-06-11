@@ -1,34 +1,26 @@
 import { useEffect, useState } from 'react'
 import '../styles/TestGame.scss'
-import Block from '../classes/game/Block'
 import Point from '../classes/game/Point'
-import Player from '../classes/game/Player'
 import Level from '../classes/game/Level'
+import levels from '../data/levels.json'
 
-const player = new Player({
-    position: Point.zero(),
-    size: new Point(100, 100),
-    color: "goldenrod"
+const level = Level.fromTemplate(levels[0], {
+    topWall: true,
+    leftWall: true,
+    rightWall: true,
+    bottomWall: true
 })
-
-const blocks = Array.from({length: 40}, () => 
-    new Block({
-        position: new Point(100 * Math.floor(Math.random() * 9), 100 * Math.floor(Math.random() * 9))
-    })
-)
-
-const level = new Level(player, blocks)
 
 function handleKeydown(event: KeyboardEvent) {
     switch (event.key) {
         case 'ArrowLeft':
-            player.startMovingLeft();
+            level.player.startMovingLeft();
             break;
         case 'ArrowRight':
-            player.startMovingRight();
+            level.player.startMovingRight();
             break;
         case 'ArrowUp':
-            player.startJumping(blocks);
+            level.player.startJumping(level.blocks);
             break;
     }
 }
@@ -36,13 +28,13 @@ function handleKeydown(event: KeyboardEvent) {
 function handleKeyup(event: KeyboardEvent) {
     switch (event.key) {
         case 'ArrowLeft':
-            player.stopMovingLeft();
+            level.player.stopMovingLeft();
             break;
         case 'ArrowRight':
-            player.stopMovingRight();
+            level.player.stopMovingRight();
             break;
         case 'ArrowUp':
-            player.stopJumping(blocks);
+            level.player.stopJumping(level.blocks);
             break;
     }
 }
@@ -80,7 +72,7 @@ export default function TestGame() {
                 <div
                     className="entity"
                     key={index}
-                    style={level.getEntityStyle(entity, new Point(500, 500), new Point(200, 300))}
+                    style={level.getEntityStyle(entity, new Point(500, 500), new Point(200, 200))}
                 />
             )}
         </div>
