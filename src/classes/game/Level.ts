@@ -15,6 +15,9 @@ export default class Level {
     top: number
     bottom: number
 
+    windowSize: Point
+    defaultPlayerPosition: Point
+
     constructor(player: Player, blocks: Block[], settings?: LevelSettings) {
         this.player = player
         this.blocks = blocks
@@ -23,6 +26,9 @@ export default class Level {
         this.right = Math.max(...blocks.map(block => block.right)) - (settings?.rightWall ? WALL_SIZE : 0)
         this.top = Math.min(...blocks.map(block => block.top)) + (settings?.topWall ? WALL_SIZE : 0)
         this.bottom = Math.max(...blocks.map(block => block.bottom)) - (settings?.bottomWall ? WALL_SIZE : 0)
+
+        this.windowSize = settings?.windowSize ?? new Point(this.width, this.height)
+        this.defaultPlayerPosition = settings?.defaultPlayerPosition ?? this.playerCenter
     }
 
     static fromTemplate(grid: string[], settings?: LevelSettings) {
@@ -87,12 +93,26 @@ export default class Level {
         return new Level(player, blocks, settings)
     }
 
+    get style() {
+        return {
+            width: this.windowSize.x,
+            height: this.windowSize.y
+        }
+    }
+
     get width() {
         return this.right - this.left
     }
 
     get height() {
         return this.bottom - this.top
+    }
+
+    get playerCenter() {
+        return new Point(
+            this.width / 2 - this.player.width / 2,
+            this.height / 2 - this.player.height / 2
+        )
     }
 
     get entities(): Entity[] {
@@ -107,32 +127,32 @@ export default class Level {
         // blocks don't need to be updated, as of now
     }
 
-    getPlayerDisplayPosition(windowSize: Point, defaultPosition: Point) {
-        let displayPosition = defaultPosition.clone()
+    getPlayerDisplayPosition(windowSize: Point) {
+        let displayPosition = this.defaultPlayerPosition.clone()
 
-        if (this.player.position.x < defaultPosition.x) {
+        if (this.player.position.x < this.defaultPlayerPosition.x) {
             displayPosition.x = this.player.position.x
-        } else if (this.width - this.player.position.x < windowSize.x - defaultPosition.x) {
+        } else if (this.width - this.player.position.x < windowSize.x - this.defaultPlayerPosition.x) {
             displayPosition.x = windowSize.x - (this.width - this.player.position.x)
         }
 
-        if (this.player.position.y < defaultPosition.y) {
+        if (this.player.position.y < this.defaultPlayerPosition.y) {
             displayPosition.y = this.player.position.y
-        } else if (this.height - this.player.position.y < windowSize.y - defaultPosition.y) {
+        } else if (this.height - this.player.position.y < windowSize.y - this.defaultPlayerPosition.y) {
             displayPosition.y = windowSize.y - (this.height - this.player.position.y)
         }
 
         return displayPosition
     }
 
-    getEntityStyle(entity: Entity, windowSize: Point, defaultPosition: Point) {
+    getEntityStyle(entity: Entity) {
         let style = entity.style
         let position
 
         if (entity === this.player) {
-            position = this.getPlayerDisplayPosition(windowSize, defaultPosition)
+            position = this.getPlayerDisplayPosition(this.windowSize)
         } else {
-            position = this.getPlayerDisplayPosition(windowSize, defaultPosition).minus(this.player.position).plus(entity.position)
+            position = this.getPlayerDisplayPosition(this.windowSize).minus(this.player.position).plus(entity.position)
         }
 
         style.left = position.x

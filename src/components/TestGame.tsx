@@ -8,7 +8,8 @@ const level = Level.fromTemplate(levels[0], {
     topWall: true,
     leftWall: true,
     rightWall: true,
-    bottomWall: true
+    windowSize: new Point(500, 600),
+    defaultPlayerPosition: new Point(200, 300)
 })
 
 function handleKeydown(event: KeyboardEvent) {
@@ -67,12 +68,12 @@ export default function TestGame() {
     }, [])
 
     return <div className="test-game">
-        <div className="game-grid">
+        <div className="game-grid" style={level.style}>
             {level.entities.map((entity, index) => 
                 <div
                     className="entity"
                     key={index}
-                    style={level.getEntityStyle(entity, new Point(500, 500), new Point(200, 200))}
+                    style={level.getEntityStyle(entity)}
                 />
             )}
         </div>
