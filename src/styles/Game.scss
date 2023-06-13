@@ -1,13 +1,32 @@
 @import '../main.scss';
 
-.game-box {
-    background: $message-color;
-    padding: 1em;
-    border-radius: 1em;
-}
-
-.game-level {
-    line-height: 1.35em;
+.level-card {
+    padding: 1rem;
+    border-radius: 1rem;
+    font-size: 1.25em;
     color: $white-color;
     font-family: sans-serif;
+    background: $message-color;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.level {
+    position: relative;
+    overflow: hidden;
+}
+
+.entity {
+    position: absolute;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.entity-text {
+    line-height: 1em;
+    margin: 0;
+    padding: 0;
 }

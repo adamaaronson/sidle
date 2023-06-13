@@ -7,8 +7,8 @@ type LevelSettings = {
     bottomWall?: boolean
     
     squareSize?: number
-    windowSize?: Point
-    defaultPlayerPosition?: Point
+    windowSquares?: Point
+    defaultPlayerSquare?: Point
 }
 
 export default LevelSettings;

@@ -1,9 +1,9 @@
 import '../styles/App.scss'
-import TestGame from './TestGame'
+import Game from './Game'
 
 function App() {
     return <div className="app">
-        <TestGame/>
+        <Game/>
     </div>
 }
 

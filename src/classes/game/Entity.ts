@@ -68,7 +68,7 @@ class Entity {
 
     get textStyle() {
         return {
-            fontSize: `${this.width * 0.95}px`
+            fontSize: `${this.width * 0.94}px`
         }
     }
 

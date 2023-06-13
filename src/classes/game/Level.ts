@@ -16,6 +16,7 @@ export default class Level {
     top: number
     bottom: number
 
+    squareSize: number
     windowSize: Point
     defaultPlayerPosition: Point
     playerDisplayPositionCache: Map<Point, Point> = new Map()
@@ -30,8 +31,9 @@ export default class Level {
         this.top = Math.min(...blocks.map(block => block.top)) + (settings?.topWall ? WALL_SIZE : 0)
         this.bottom = Math.max(...blocks.map(block => block.bottom)) - (settings?.bottomWall ? WALL_SIZE : 0)
 
-        this.windowSize = settings?.windowSize ?? new Point(this.width, this.height)
-        this.defaultPlayerPosition = settings?.defaultPlayerPosition ?? this.playerCenter
+        this.squareSize = settings?.squareSize ?? SQUARE_SIZE
+        this.windowSize = settings?.windowSquares?.times(this.squareSize) ?? new Point(this.width, this.height)
+        this.defaultPlayerPosition = settings?.defaultPlayerSquare?.times(this.squareSize) ?? this.playerCenter
     }
 
     static fromTemplate(grid: string[], settings?: LevelSettings) {
