@@ -21,7 +21,7 @@ function handleKeydown(event: KeyboardEvent) {
             level.player.startMovingRight();
             break;
         case 'ArrowUp':
-            level.player.startJumping(level.blocks);
+            level.player.startJumping(level.getVisibleBlocks());
             break;
     }
 }
@@ -35,7 +35,7 @@ function handleKeyup(event: KeyboardEvent) {
             level.player.stopMovingRight();
             break;
         case 'ArrowUp':
-            level.player.stopJumping(level.blocks);
+            level.player.stopJumping(level.getVisibleBlocks());
             break;
     }
 }
@@ -69,7 +69,7 @@ export default function TestGame() {
 
     return <div className="test-game">
         <div className="game-grid" style={level.style}>
-            {level.entities.map((entity, index) => 
+            {level.getVisibleEntities().map((entity, index) => 
                 <div
                     className="entity"
                     key={index}

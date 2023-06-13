@@ -9,6 +9,7 @@ import Point from './Point'
 export default class Level {
     player: Player
     blocks: Block[]
+    background: Block[]
 
     left: number
     right: number
@@ -17,10 +18,12 @@ export default class Level {
 
     windowSize: Point
     defaultPlayerPosition: Point
+    playerDisplayPositionCache: Map<Point, Point> = new Map()
 
-    constructor(player: Player, blocks: Block[], settings?: LevelSettings) {
+    constructor(player: Player, blocks: Block[], background: Block[], settings?: LevelSettings) {
         this.player = player
         this.blocks = blocks
+        this.background = background
 
         this.left = Math.min(...blocks.map(block => block.left)) + (settings?.leftWall ? WALL_SIZE : 0)
         this.right = Math.max(...blocks.map(block => block.right)) - (settings?.rightWall ? WALL_SIZE : 0)
@@ -36,8 +39,9 @@ export default class Level {
         const width = grid[0].length * squareSize.x
         const height = grid.length * squareSize.y
 
-        let player = new Player({ size: squareSize })
+        let player = new Player({ size: squareSize, color: 'goldenrod' })
         let blocks: Block[] = []
+        let background: Block[] = []
 
         // add entities from template
         for (let row = 0; row < grid.length; row++) {
@@ -54,8 +58,10 @@ export default class Level {
                         break
                     case Symbol.Player:
                         player.position = position
-                        player.color = 'goldenrod'
+                        background.push(Level.getBackgroundBlock(squareSize, position))
                         break
+                    default:
+                        background.push(Level.getBackgroundBlock(squareSize, position))
                 }
             }
         }
@@ -90,7 +96,7 @@ export default class Level {
             }))
         }
 
-        return new Level(player, blocks, settings)
+        return new Level(player, blocks, background, settings)
     }
 
     get style() {
@@ -116,48 +122,90 @@ export default class Level {
     }
 
     get entities(): Entity[] {
+        // back to front order
         return [
+            ...this.blocks,
+            ...this.background,
             this.player,
-            ...this.blocks
         ]
     }
 
+    getVisibleEntities() {
+        return this.entities.filter(entity => this.isVisible(entity))
+    }
+
+    getVisibleBlocks() {
+        return this.blocks.filter(block => this.isVisible(block))
+    }
+
     update(timestamp: number) {
-        this.player.update(timestamp, this.blocks)
+        this.player.update(timestamp, this.getVisibleBlocks())
         // blocks don't need to be updated, as of now
     }
 
-    getPlayerDisplayPosition(windowSize: Point) {
+    getPlayerDisplayPosition() {
+        if (this.playerDisplayPositionCache.has(this.player.position)) {
+            const position = this.playerDisplayPositionCache.get(this.player.position)
+            if (position) {
+                return position.clone()
+            }
+        }
+
         let displayPosition = this.defaultPlayerPosition.clone()
 
+        // edge cases: if player too close to edge, move player away from default position
         if (this.player.position.x < this.defaultPlayerPosition.x) {
             displayPosition.x = this.player.position.x
-        } else if (this.width - this.player.position.x < windowSize.x - this.defaultPlayerPosition.x) {
-            displayPosition.x = windowSize.x - (this.width - this.player.position.x)
+        } else if (this.width - this.player.position.x < this.windowSize.x - this.defaultPlayerPosition.x) {
+            displayPosition.x = this.windowSize.x - (this.width - this.player.position.x)
         }
 
         if (this.player.position.y < this.defaultPlayerPosition.y) {
             displayPosition.y = this.player.position.y
-        } else if (this.height - this.player.position.y < windowSize.y - this.defaultPlayerPosition.y) {
-            displayPosition.y = windowSize.y - (this.height - this.player.position.y)
+        } else if (this.height - this.player.position.y < this.windowSize.y - this.defaultPlayerPosition.y) {
+            displayPosition.y = this.windowSize.y - (this.height - this.player.position.y)
         }
+
+        this.playerDisplayPositionCache.set(this.player.position, displayPosition.clone())
 
         return displayPosition
     }
 
+    getEntityDisplayPosition(entity: Entity) {
+        if (entity === this.player) {
+            return this.getPlayerDisplayPosition()
+        } else {
+            return this.getPlayerDisplayPosition().minus(this.player.position).plus(entity.position)
+        }
+    }
+
     getEntityStyle(entity: Entity) {
         let style = entity.style
-        let position
-
-        if (entity === this.player) {
-            position = this.getPlayerDisplayPosition(this.windowSize)
-        } else {
-            position = this.getPlayerDisplayPosition(this.windowSize).minus(this.player.position).plus(entity.position)
-        }
+        const position = this.getEntityDisplayPosition(entity)
 
         style.left = position.x
         style.top = position.y
 
         return style
+    }
+
+    isVisible(entity: Entity) {
+        const topLeft = this.getEntityDisplayPosition(entity)
+        const bottomRight = topLeft.plus(entity.size)
+
+        return (
+            bottomRight.x >= 0 &&
+            bottomRight.y >= 0 &&
+            topLeft.x <= this.windowSize.x &&
+            topLeft.y <= this.windowSize.y
+        )
+    }
+
+    static getBackgroundBlock(size: Point, position: Point) {
+        return new Block({
+            size: size,
+            position: position,
+            color: 'aqua'
+        })
     }
 }
