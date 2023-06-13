@@ -43,9 +43,6 @@ function handleKeyup(event: KeyboardEvent) {
 export default function TestGame() {
     const [, setTimestamp] = useState(0)
 
-    // TODO: store the blocks in a smart way to fetch
-    // only the ones that are adjacent to the player for each update
-
     const gameLoop = (timestamp: number) => {
         level.update(timestamp)
         setTimestamp(timestamp)
