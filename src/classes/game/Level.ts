@@ -36,22 +36,22 @@ export default class Level {
 
     static fromTemplate(grid: string[], settings?: LevelSettings) {
         const squareSize = settings?.squareSize ?? SQUARE_SIZE
-        const width = grid[0].length * squareSize.x
-        const height = grid.length * squareSize.y
+        const width = grid[0].length * squareSize
+        const height = grid.length * squareSize
 
-        let player = new Player({ size: squareSize, text: '🟨' })
+        let player = new Player({ text: '🟨' })
         let blocks: Block[] = []
         let background: Block[] = []
 
         // add entities from template
         for (let row = 0; row < grid.length; row++) {
             for (let col = 0; col < grid[row].length; col++) {
-                let position = new Point(col * squareSize.x, row * squareSize.y)
+                let position = new Point(col * squareSize, row * squareSize)
 
                 switch (grid[row][col]) {
                     case Symbol.Block:
                         const block = new Block({
-                            size: squareSize,
+                            size: new Point(squareSize, squareSize),
                             position: position,
                             text: '🟩'
                         })
@@ -202,9 +202,9 @@ export default class Level {
         )
     }
 
-    static getBackgroundBlock(size: Point, position: Point) {
+    static getBackgroundBlock(squareSize: number, position: Point) {
         return new Block({
-            size: size,
+            size: new Point(squareSize, squareSize),
             position: position,
             text: '⬛️'
         })

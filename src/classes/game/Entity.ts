@@ -14,7 +14,7 @@ class Entity {
     previousStep: Point;
     
     constructor(settings: EntitySettings) {
-        this.size = settings.size ?? SQUARE_SIZE
+        this.size = settings.size ?? new Point(SQUARE_SIZE, SQUARE_SIZE)
         this.position = settings.position ?? Point.zero()
         this.velocity = settings.velocity ?? Point.zero()
         this.acceleration = settings.acceleration ?? new Point(0, GRAVITY)
@@ -63,6 +63,12 @@ class Entity {
             width: this.width,
             height: this.height,
             backgroundColor: this.color
+        }
+    }
+
+    get textStyle() {
+        return {
+            fontSize: `${this.width * 0.95}px`
         }
     }
 

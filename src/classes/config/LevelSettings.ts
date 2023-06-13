@@ -6,7 +6,7 @@ type LevelSettings = {
     topWall?: boolean
     bottomWall?: boolean
     
-    squareSize?: Point
+    squareSize?: number
     windowSize?: Point
     defaultPlayerPosition?: Point
 }
