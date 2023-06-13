@@ -39,7 +39,7 @@ export default class Level {
         const width = grid[0].length * squareSize.x
         const height = grid.length * squareSize.y
 
-        let player = new Player({ size: squareSize, color: 'goldenrod' })
+        let player = new Player({ size: squareSize, text: '🟨' })
         let blocks: Block[] = []
         let background: Block[] = []
 
@@ -52,7 +52,8 @@ export default class Level {
                     case Symbol.Block:
                         const block = new Block({
                             size: squareSize,
-                            position: position
+                            position: position,
+                            text: '🟩'
                         })
                         blocks.push(block)
                         break
@@ -205,7 +206,7 @@ export default class Level {
         return new Block({
             size: size,
             position: position,
-            color: 'aqua'
+            text: '⬛️'
         })
     }
 }

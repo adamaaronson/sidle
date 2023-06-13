@@ -71,7 +71,11 @@ export default function TestGame() {
                     className="entity"
                     key={index}
                     style={level.getEntityStyle(entity)}
-                />
+                >
+                    <div className="entity-text">
+                        {entity.text}
+                    </div>
+                </div>
             )}
         </div>
     </div>

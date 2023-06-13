@@ -1,12 +1,20 @@
 @import '../main.scss';
 
 .game-grid {
-    background: white;
     position: relative;
     overflow: hidden;
 }
 
 .entity {
-    background: goldenrod;
     position: absolute;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.entity-text {
+    font-size: 95px;
+    line-height: 1em;
+    margin: 0;
+    padding: 0;
 }

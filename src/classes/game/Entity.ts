@@ -1,4 +1,4 @@
-import { GRAVITY, SQUARE_SIZE } from "../config/Defaults";
+import { BACKGROUND_COLOR, GRAVITY, SQUARE_SIZE } from "../config/Defaults";
 import EntitySettings from "../config/EntitySettings";
 import Point from "./Point";
 
@@ -8,6 +8,7 @@ class Entity {
     velocity: Point;
     acceleration: Point;
     color: string;
+    text: string;
 
     lastUpdated: number;
     previousStep: Point;
@@ -17,7 +18,8 @@ class Entity {
         this.position = settings.position ?? Point.zero()
         this.velocity = settings.velocity ?? Point.zero()
         this.acceleration = settings.acceleration ?? new Point(0, GRAVITY)
-        this.color = settings.color ?? "green"
+        this.color = settings.color ?? BACKGROUND_COLOR
+        this.text = settings.text ?? ""
 
         this.lastUpdated = performance.now()
         this.previousStep = Point.zero()

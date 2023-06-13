@@ -6,6 +6,8 @@ type EntitySettings = {
     velocity?: Point;
     acceleration?: Point;
     color?: string;
+    text?: string;
+    
     walkingSpeed?: number;
     jumpingSpeed?: number;
 }
