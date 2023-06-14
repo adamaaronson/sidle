@@ -90,11 +90,11 @@ class Entity {
         const dAcceleration = this.acceleration.times(secondsElapsed)
         this.velocity.add(dAcceleration)
 
-        if (this.velocity.y > 0 && this.isBottomTouchingAny(blocks)) {
+        if (this.velocity.y > 0 && this.isBottomTouching(blocks)) {
             this.velocity.y = 0 // stop moving if on the ground
         }
 
-        if (this.velocity.y < 0 && this.isTopTouchingAny(blocks)) {
+        if (this.velocity.y < 0 && this.isTopTouching(blocks)) {
             this.velocity.y = 0 // stop moving if on the ceiling
         }
     }
@@ -108,10 +108,10 @@ class Entity {
         for (let i = 0; i < size; i++) {
             const currentStep = step.clone()
 
-            const rightTouching = this.isRightTouchingAny(blocks)
-            const leftTouching = this.isLeftTouchingAny(blocks)
-            const bottomTouching = this.isBottomTouchingAny(blocks)
-            const topTouching = this.isTopTouchingAny(blocks)
+            const rightTouching = this.isRightTouching(blocks)
+            const leftTouching = this.isLeftTouching(blocks)
+            const bottomTouching = this.isBottomTouching(blocks)
+            const topTouching = this.isTopTouching(blocks)
 
             const bottomRightTouching = !bottomTouching && !rightTouching && this.isBottomRightTouching(blocks)
             const bottomLeftTouching = !bottomTouching && !leftTouching && this.isBottomLeftTouching(blocks)
@@ -169,50 +169,25 @@ class Entity {
 
     // Edge touching block
 
-    isTopTouching(block: Entity) {
-        return this.top === block.bottom && this.right > block.left && this.left < block.right
-    }
-
-    isBottomTouching(block: Entity) {
-        return this.bottom === block.top && this.right > block.left && this.left < block.right
-    }
-
-    isLeftTouching(block: Entity) {
-        return this.left === block.right && this.bottom > block.top && this.top < block.bottom   
-    }
-
-    isRightTouching(block: Entity) {
-        return this.right === block.left && this.bottom > block.top && this.top < block.bottom
-    }
-
-    getTouching(blocks: Entity[]) {
-        return blocks.filter(block =>
-            this.isTopTouching(block) ||
-            this.isBottomTouching(block) ||
-            this.isLeftTouching(block) ||
-            this.isRightTouching(block)
-        )
-    }
-
-    isTopTouchingAny(blocks: Entity[]) {
+    isTopTouching(blocks: Entity[]) {
         return blocks.some(block => 
             this.top === block.bottom && this.right > block.left && this.left < block.right
         )
     }
 
-    isBottomTouchingAny(blocks: Entity[]) {
+    isBottomTouching(blocks: Entity[]) {
         return blocks.some(block => 
             this.bottom === block.top && this.right > block.left && this.left < block.right
         )
     }
 
-    isLeftTouchingAny(blocks: Entity[]) {
+    isLeftTouching(blocks: Entity[]) {
         return blocks.some(block => 
             this.left === block.right && this.bottom > block.top && this.top < block.bottom
         )
     }
 
-    isRightTouchingAny(blocks: Entity[]) {
+    isRightTouching(blocks: Entity[]) {
         return blocks.some(block => 
             this.right === block.left && this.bottom > block.top && this.top < block.bottom
         )
