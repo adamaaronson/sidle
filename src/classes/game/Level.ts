@@ -3,11 +3,11 @@ import LevelSettings from '../config/LevelSettings'
 import Symbol from '../config/Symbol'
 import Block from './Block'
 import Entity from './Entity'
-import Player from './Player'
+import MultiPlayer from './MultiPlayer'
 import Point from './Point'
 
 export default class Level {
-    player: Player
+    player: MultiPlayer
     blocks: Block[]
     background: Block[]
 
@@ -21,7 +21,7 @@ export default class Level {
     defaultPlayerPosition: Point
     playerDisplayPositionCache: Map<Point, Point> = new Map()
 
-    constructor(player: Player, blocks: Block[], background: Block[], settings?: LevelSettings) {
+    constructor(player: MultiPlayer, blocks: Block[], background: Block[], settings?: LevelSettings) {
         this.player = player
         this.blocks = blocks
         this.background = background
@@ -33,7 +33,10 @@ export default class Level {
 
         this.squareSize = settings?.squareSize ?? SQUARE_SIZE
         this.windowSize = settings?.windowSquares?.times(this.squareSize) ?? new Point(this.width, this.height)
-        this.defaultPlayerPosition = settings?.defaultPlayerSquare?.times(this.squareSize) ?? this.playerCenter
+        this.defaultPlayerPosition = settings?.defaultPlayerSquare?.times(this.squareSize) // top left square of default player position
+                .minus(this.player.size.times(0.5))                                        // offset by half of the player size
+                .plus(new Point(this.squareSize, this.squareSize).times(0.5))              // offset by half of the square size
+                ?? this.playerCenter
     }
 
     static fromTemplate(grid: string[], settings?: LevelSettings) {
@@ -41,7 +44,7 @@ export default class Level {
         const width = grid[0].length * squareSize
         const height = grid.length * squareSize
 
-        let player = new Player({ text: '🟨' })
+        let playerSubentities: Block[] = []
         let blocks: Block[] = []
         let background: Block[] = []
 
@@ -52,19 +55,14 @@ export default class Level {
 
                 switch (grid[row][col]) {
                     case Symbol.Block:
-                        const block = new Block({
-                            size: new Point(squareSize, squareSize),
-                            position: position,
-                            text: '🟩'
-                        })
-                        blocks.push(block)
+                        blocks.push(Level.createBlock(squareSize, position))
                         break
                     case Symbol.Player:
-                        player.position = position
-                        background.push(Level.getBackgroundBlock(squareSize, position))
+                        playerSubentities.push(Level.createPlayerSubentity(squareSize, position.clone()))
+                        background.push(Level.createBackgroundBlock(squareSize, position.clone()))
                         break
                     default:
-                        background.push(Level.getBackgroundBlock(squareSize, position))
+                        background.push(Level.createBackgroundBlock(squareSize, position))
                 }
             }
         }
@@ -99,6 +97,8 @@ export default class Level {
             }))
         }
 
+        let player = new MultiPlayer(playerSubentities)
+
         return new Level(player, blocks, background, settings)
     }
 
@@ -129,7 +129,7 @@ export default class Level {
         return [
             ...this.blocks,
             ...this.background,
-            this.player,
+            ...this.player.subentities
         ]
     }
 
@@ -155,21 +155,24 @@ export default class Level {
         }
 
         let displayPosition = this.defaultPlayerPosition.clone()
+        let playerLeft = this.player.position.x
+        let playerTop = this.player.position.y
 
         // edge cases: if player too close to edge, move player away from default position
-        if (this.player.position.x < this.defaultPlayerPosition.x) {
-            displayPosition.x = this.player.position.x
-        } else if (this.width - this.player.position.x < this.windowSize.x - this.defaultPlayerPosition.x) {
-            displayPosition.x = this.windowSize.x - (this.width - this.player.position.x)
+        if (playerLeft < this.defaultPlayerPosition.x) {
+            displayPosition.x = playerLeft
+        } else if (this.width - playerLeft < this.windowSize.x - this.defaultPlayerPosition.x) {
+            displayPosition.x = this.windowSize.x - (this.width - playerLeft)
         }
 
-        if (this.player.position.y < this.defaultPlayerPosition.y) {
-            displayPosition.y = this.player.position.y
-        } else if (this.height - this.player.position.y < this.windowSize.y - this.defaultPlayerPosition.y) {
-            displayPosition.y = this.windowSize.y - (this.height - this.player.position.y)
+        if (playerTop < this.defaultPlayerPosition.y) {
+            displayPosition.y = playerTop
+        } else if (this.height - playerTop < this.windowSize.y - this.defaultPlayerPosition.y) {
+            displayPosition.y = this.windowSize.y - (this.height - playerTop)
         }
 
         this.playerDisplayPositionCache.set(this.player.position, displayPosition.clone())
+
 
         return displayPosition
     }
@@ -204,7 +207,23 @@ export default class Level {
         )
     }
 
-    static getBackgroundBlock(squareSize: number, position: Point) {
+    static createPlayerSubentity(squareSize: number, position: Point) {
+        return new Block({
+            size: new Point(squareSize, squareSize),
+            position: position,
+            text: '🟨'
+        })
+    }
+
+    static createBlock(squareSize: number, position: Point) {
+        return new Block({
+            size: new Point(squareSize, squareSize),
+            position: position,
+            text: '🟩'
+        })
+    }
+
+    static createBackgroundBlock(squareSize: number, position: Point) {
         return new Block({
             size: new Point(squareSize, squareSize),
             position: position,

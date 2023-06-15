@@ -13,13 +13,13 @@ class Entity {
     lastUpdated: number;
     previousStep: Point;
     
-    constructor(settings: EntitySettings) {
-        this.size = settings.size ?? new Point(SQUARE_SIZE, SQUARE_SIZE)
-        this.position = settings.position ?? Point.zero()
-        this.velocity = settings.velocity ?? Point.zero()
-        this.acceleration = settings.acceleration ?? new Point(0, GRAVITY)
-        this.color = settings.color ?? BACKGROUND_COLOR
-        this.text = settings.text ?? ""
+    constructor(settings?: EntitySettings) {
+        this.size = settings?.size ?? new Point(SQUARE_SIZE, SQUARE_SIZE)
+        this.position = settings?.position ?? Point.zero()
+        this.velocity = settings?.velocity ?? Point.zero()
+        this.acceleration = settings?.acceleration ?? new Point(0, GRAVITY)
+        this.color = settings?.color ?? BACKGROUND_COLOR
+        this.text = settings?.text ?? ""
 
         this.lastUpdated = performance.now()
         this.previousStep = Point.zero()
@@ -72,6 +72,10 @@ class Entity {
         }
     }
 
+    setPosition(newPosition: Point) {
+        this.position = newPosition
+    }
+
     update(timestamp: number, blocks: Entity[]) {
         const secondsElapsed = (timestamp - this.lastUpdated) / 1000
 
@@ -103,6 +107,7 @@ class Entity {
     interpolatePosition(vector: Point, blocks: Entity[]) {
         const size = vector.isWide() ? vector.width : vector.height
         const step = vector.dividedBy(size)
+        let initialPosition = this.position.clone()
         let unroundedPosition = this.position.clone() // keep track of fractional pixels throughout interpolation
         
         for (let i = 0; i < size; i++) {
@@ -163,8 +168,10 @@ class Entity {
                 this.previousStep = delta
             }
 
-            this.position = nextPosition
+            this.setPosition(nextPosition)
         }
+        
+        return this.position.minus(initialPosition)
     }
 
     // Edge touching block

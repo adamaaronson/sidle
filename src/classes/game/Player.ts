@@ -9,10 +9,10 @@ export default class Player extends Entity {
     isMovingRight: boolean = false;
     isJumping: boolean = false;
 
-    constructor(settings: EntitySettings) {
+    constructor(settings?: EntitySettings) {
         super(settings)
-        this.walkingSpeed = settings.walkingSpeed ?? WALKING_SPEED
-        this.jumpingSpeed = settings.jumpingSpeed ?? JUMPING_SPEED
+        this.walkingSpeed = settings?.walkingSpeed ?? WALKING_SPEED
+        this.jumpingSpeed = settings?.jumpingSpeed ?? JUMPING_SPEED
     }
 
     override update(timestamp: number, blocks: Entity[]) {
