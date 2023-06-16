@@ -4,10 +4,9 @@ import Point from '../classes/game/Point'
 import Level from '../classes/game/Level'
 import levels from '../data/levels.json'
 
-const level = Level.fromTemplate(levels[0], {
+const level = Level.fromTemplate(levels[3], {
     topWall: true,
     leftWall: true,
-    rightWall: true,
     windowSquares: new Point(5, 6),
     defaultPlayerSquare: new Point(2, 3)
 })

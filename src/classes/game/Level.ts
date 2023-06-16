@@ -142,8 +142,9 @@ export default class Level {
     }
 
     update(timestamp: number) {
-        this.player.update(timestamp, this.getVisibleBlocks())
-        // blocks don't need to be updated, as of now
+        if (this.isVisible(this.player)) {
+            this.player.update(timestamp, this.getVisibleBlocks())
+        }
     }
 
     getPlayerDisplayPosition() {
