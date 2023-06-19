@@ -4,12 +4,14 @@ import Point from '../classes/game/Point'
 import Level from '../classes/game/Level'
 import levels from '../data/levels.json'
 
-const level = Level.fromTemplate(levels[3], {
+const level = Level.fromTemplate(levels[0], {
     topWall: true,
     leftWall: true,
     windowSquares: new Point(5, 6),
     defaultPlayerSquare: new Point(2, 3)
 })
+
+let animating = false;
 
 function handleKeydown(event: KeyboardEvent) {
     switch (event.key) {
@@ -50,7 +52,10 @@ export default function Game() {
     }
 
     useEffect(() => {
-        requestAnimationFrame(gameLoop)
+        if (!animating) {
+            requestAnimationFrame(gameLoop)
+            animating = true;
+        }
     }, [])
 
     useEffect(() => {

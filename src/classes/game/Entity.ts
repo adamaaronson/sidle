@@ -107,7 +107,6 @@ class Entity {
     interpolatePosition(vector: Point, blocks: Entity[]) {
         const size = vector.isWide() ? vector.width : vector.height
         const step = vector.dividedBy(size)
-        let initialPosition = this.position.clone()
         let unroundedPosition = this.position.clone() // keep track of fractional pixels throughout interpolation
         
         for (let i = 0; i < size; i++) {
@@ -143,16 +142,20 @@ class Entity {
                     currentStep.y = 0 // fall into wall gap
                 } else if (bottomLeftTouching && this.previousStep.isWide()) {
                     currentStep.x = 0 // walk into floor gap
+                } else if (currentStep.y > 0) {
+                    currentStep.y = 0 // fall onto block
                 } else {
-                    currentStep.y = 0 // doesn't matter, fall onto block
+                    currentStep.x = 0
                 }
             } else if (bottomLeftTouching && currentStep.x < 0) {
                 if (topLeftTouching && this.previousStep.isTall()) {
                     currentStep.y = 0 // fall into wall gap
                 } else if (bottomRightTouching && this.previousStep.isWide()) {
                     currentStep.x = 0 // walk into floor gap
+                } else if (currentStep.y > 0) {
+                    currentStep.y = 0 // fall onto block
                 } else {
-                    currentStep.y = 0 // doesn't matter, fall onto block
+                    currentStep.x = 0
                 }
             } else if (topRightTouching && currentStep.x > 0 && currentStep.y < 0) {
                 currentStep.x = 0 // doesn't matter, hit side of block
@@ -170,8 +173,6 @@ class Entity {
 
             this.setPosition(nextPosition)
         }
-        
-        return this.position.minus(initialPosition)
     }
 
     // Edge touching block
