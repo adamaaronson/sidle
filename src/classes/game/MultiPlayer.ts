@@ -11,6 +11,7 @@ export default class MultiPlayer extends Player {
         super(settings)
         this.subentities = subentities
         this.position = new Point(this.left, this.top)
+        this.unroundedPosition = this.position.clone()
         this.size = new Point(this.width, this.height)
     }
 

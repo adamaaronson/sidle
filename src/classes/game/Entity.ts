@@ -11,6 +11,7 @@ class Entity {
     text: string;
 
     lastUpdated: number;
+    unroundedPosition: Point;
     previousStep: Point;
     
     constructor(settings?: EntitySettings) {
@@ -22,6 +23,7 @@ class Entity {
         this.text = settings?.text ?? ""
 
         this.lastUpdated = performance.now()
+        this.unroundedPosition = this.position.clone()
         this.previousStep = Point.zero()
     }
 
@@ -86,8 +88,10 @@ class Entity {
     }
 
     updatePosition(secondsElapsed: number, blocks: Entity[]) {
-        const dVelocity = this.velocity.times(secondsElapsed).rounded()
-        this.interpolatePosition(dVelocity, blocks)
+        const dVelocity = this.velocity.times(secondsElapsed)
+        const ddAcceleration = this.acceleration.times(secondsElapsed ** 2).times(0.5)
+        const vector = dVelocity.plus(ddAcceleration)
+        this.interpolatePosition(vector, blocks)
     }
 
     updateVelocity(secondsElapsed: number, blocks: Entity[]) {
@@ -105,10 +109,17 @@ class Entity {
 
     // https://en.wikipedia.org/wiki/Digital_differential_analyzer_(graphics_algorithm)
     interpolatePosition(vector: Point, blocks: Entity[]) {
-        const size = vector.isWide() ? vector.width : vector.height
-        const step = vector.dividedBy(size)
-        let unroundedPosition = this.position.clone() // keep track of fractional pixels throughout interpolation
-        
+        const roundedInitialPosition = this.position.clone()
+        const unroundedFinalPosition = this.unroundedPosition.plus(vector)
+        const roundedFinalPosition = unroundedFinalPosition.rounded()
+        const roundedVector = roundedFinalPosition.minus(roundedInitialPosition)
+
+        const size = roundedVector.isWide() ? roundedVector.width : roundedVector.height
+        const step = roundedVector.dividedBy(size)
+
+        let didCollideX = false
+        let didCollideY = false
+
         for (let i = 0; i < size; i++) {
             const currentStep = step.clone()
 
@@ -125,53 +136,77 @@ class Entity {
             // if moving into wall, stop doing that
             if (rightTouching && step.x > 0) {
                 currentStep.x = 0
+                didCollideX = true
             } else if (leftTouching && step.x < 0) {
                 currentStep.x = 0
+                didCollideX = true
             }
             
             // if moving into floor or ceiling, stop doing that
             if (bottomTouching && step.y > 0) {
                 currentStep.y = 0
+                didCollideY = true
             } else if (topTouching && step.y < 0) {
                 currentStep.y = 0
+                didCollideY = true
             }
 
             // if moving into a corner, decide whether to go vertically or horizontally
             if (bottomRightTouching && currentStep.x > 0) {
                 if (topRightTouching && this.previousStep.isTall()) {
-                    currentStep.y = 0 // fall into wall gap
+                    currentStep.y = 0
+                    didCollideY = true // fall into wall gap
                 } else if (bottomLeftTouching && this.previousStep.isWide()) {
-                    currentStep.x = 0 // walk into floor gap
+                    currentStep.x = 0
+                    didCollideX = true // walk into floor gap
                 } else if (currentStep.y > 0) {
-                    currentStep.y = 0 // fall onto block
+                    currentStep.y = 0
+                    didCollideY = true // fall onto block
                 } else {
                     currentStep.x = 0
+                    didCollideX = true
                 }
             } else if (bottomLeftTouching && currentStep.x < 0) {
                 if (topLeftTouching && this.previousStep.isTall()) {
-                    currentStep.y = 0 // fall into wall gap
+                    currentStep.y = 0
+                    didCollideY = true // fall into wall gap
                 } else if (bottomRightTouching && this.previousStep.isWide()) {
-                    currentStep.x = 0 // walk into floor gap
+                    currentStep.x = 0
+                    didCollideX = true // walk into floor gap
                 } else if (currentStep.y > 0) {
-                    currentStep.y = 0 // fall onto block
+                    currentStep.y = 0
+                    didCollideY = true // fall onto block
                 } else {
                     currentStep.x = 0
+                    didCollideX = true
                 }
             } else if (topRightTouching && currentStep.x > 0 && currentStep.y < 0) {
-                currentStep.x = 0 // doesn't matter, hit side of block
+                currentStep.x = 0
+                didCollideX = true // doesn't matter, hit side of block
             } else if (topLeftTouching && currentStep.x < 0 && currentStep.y < 0) {
-                currentStep.x = 0 // doesn't matter, hit side of block
+                currentStep.x = 0
+                didCollideX = true // doesn't matter, hit side of block
             }
 
-            unroundedPosition.add(currentStep)
+            this.unroundedPosition.add(currentStep)
 
-            const nextPosition = unroundedPosition.rounded()
+            const nextPosition = this.unroundedPosition.rounded()
             const delta = nextPosition.minus(this.position)
             if (!delta.isZero()) {
                 this.previousStep = delta
             }
 
             this.setPosition(nextPosition)
+        }
+
+        this.unroundedPosition = unroundedFinalPosition
+
+        if (didCollideX) {
+            this.unroundedPosition.x = this.position.x // position changed during collision
+        }
+
+        if (didCollideY) {
+            this.unroundedPosition.y = this.position.y // position changed during collision
         }
     }
 
