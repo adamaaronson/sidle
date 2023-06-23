@@ -1,5 +1,6 @@
 import { BACKGROUND_COLOR, GRAVITY, SQUARE_SIZE } from "../config/Defaults";
 import EntitySettings from "../config/EntitySettings";
+import BoolPoint from "./BoolPoint";
 import Point from "./Point";
 
 class Entity {
@@ -122,70 +123,20 @@ class Entity {
 
         for (let i = 0; i < size; i++) {
             const currentStep = step.clone()
+            const hasCollision = this.checkForCollisions(blocks, currentStep)
 
-            const rightTouching = this.isRightTouching(blocks)
-            const leftTouching = this.isLeftTouching(blocks)
-            const bottomTouching = this.isBottomTouching(blocks)
-            const topTouching = this.isTopTouching(blocks)
-
-            const bottomRightTouching = !bottomTouching && !rightTouching && this.isBottomRightTouching(blocks)
-            const bottomLeftTouching = !bottomTouching && !leftTouching && this.isBottomLeftTouching(blocks)
-            const topRightTouching = !topTouching && !rightTouching && this.isTopRightTouching(blocks)
-            const topLeftTouching = !topTouching && !leftTouching && this.isTopLeftTouching(blocks)
-            
-            // if moving into wall, stop doing that
-            if (rightTouching && step.x > 0) {
-                currentStep.x = 0
-                didCollideX = true
-            } else if (leftTouching && step.x < 0) {
+            if (hasCollision.x) {
                 currentStep.x = 0
                 didCollideX = true
             }
-            
-            // if moving into floor or ceiling, stop doing that
-            if (bottomTouching && step.y > 0) {
-                currentStep.y = 0
-                didCollideY = true
-            } else if (topTouching && step.y < 0) {
+
+            if (hasCollision.y) {
                 currentStep.y = 0
                 didCollideY = true
             }
 
-            // if moving into a corner, decide whether to go vertically or horizontally
-            if (bottomRightTouching && currentStep.x > 0) {
-                if (topRightTouching && this.previousStep.isTall()) {
-                    currentStep.y = 0
-                    didCollideY = true // fall into wall gap
-                } else if (bottomLeftTouching && this.previousStep.isWide()) {
-                    currentStep.x = 0
-                    didCollideX = true // walk into floor gap
-                } else if (currentStep.y > 0) {
-                    currentStep.y = 0
-                    didCollideY = true // fall onto block
-                } else {
-                    currentStep.x = 0
-                    didCollideX = true
-                }
-            } else if (bottomLeftTouching && currentStep.x < 0) {
-                if (topLeftTouching && this.previousStep.isTall()) {
-                    currentStep.y = 0
-                    didCollideY = true // fall into wall gap
-                } else if (bottomRightTouching && this.previousStep.isWide()) {
-                    currentStep.x = 0
-                    didCollideX = true // walk into floor gap
-                } else if (currentStep.y > 0) {
-                    currentStep.y = 0
-                    didCollideY = true // fall onto block
-                } else {
-                    currentStep.x = 0
-                    didCollideX = true
-                }
-            } else if (topRightTouching && currentStep.x > 0 && currentStep.y < 0) {
-                currentStep.x = 0
-                didCollideX = true // doesn't matter, hit side of block
-            } else if (topLeftTouching && currentStep.x < 0 && currentStep.y < 0) {
-                currentStep.x = 0
-                didCollideX = true // doesn't matter, hit side of block
+            if (i === size) {
+                break
             }
 
             this.unroundedPosition.add(currentStep)
@@ -208,6 +159,65 @@ class Entity {
         if (didCollideY) {
             this.unroundedPosition.y = this.position.y // position changed during collision
         }
+
+        // console.log(this.position, this.unroundedPosition, didCollideX, didCollideY, size)
+    }
+
+    checkForCollisions(blocks: Entity[], step: Point) {
+        const rightTouching = this.isRightTouching(blocks)
+        const leftTouching = this.isLeftTouching(blocks)
+        const bottomTouching = this.isBottomTouching(blocks)
+        const topTouching = this.isTopTouching(blocks)
+
+        const bottomRightTouching = !bottomTouching && !rightTouching && this.isBottomRightTouching(blocks)
+        const bottomLeftTouching = !bottomTouching && !leftTouching && this.isBottomLeftTouching(blocks)
+        const topRightTouching = !topTouching && !rightTouching && this.isTopRightTouching(blocks)
+        const topLeftTouching = !topTouching && !leftTouching && this.isTopLeftTouching(blocks)
+
+        const hasCollision = new BoolPoint(false, false)
+        
+        // if moving into wall, stop doing that
+        if (rightTouching && step.x > 0) {
+            hasCollision.x = true
+        } else if (leftTouching && step.x < 0) {
+            hasCollision.x = true
+        }
+        
+        // if moving into floor or ceiling, stop doing that
+        if (bottomTouching && step.y > 0) {
+            hasCollision.y = true
+        } else if (topTouching && step.y < 0) {
+            hasCollision.y = true
+        }
+
+        // if moving into a corner, decide whether to go vertically or horizontally
+        if (bottomRightTouching && step.x > 0) {
+            if (topRightTouching && this.previousStep.isTall()) {
+                hasCollision.y = true // fall into wall gap
+            } else if (bottomLeftTouching && this.previousStep.isWide()) {
+                hasCollision.x = true // walk into floor gap
+            } else if (step.y > 0) {
+                hasCollision.y = true // fall onto block
+            } else {
+                hasCollision.x = true
+            }
+        } else if (bottomLeftTouching && step.x < 0) {
+            if (topLeftTouching && this.previousStep.isTall()) {
+                hasCollision.y = true // fall into wall gap
+            } else if (bottomRightTouching && this.previousStep.isWide()) {
+                hasCollision.x = true // walk into floor gap
+            } else if (step.y > 0) {
+                hasCollision.y = true // fall onto block
+            } else {
+                hasCollision.x = true
+            }
+        } else if (topRightTouching && step.x > 0 && step.y < 0) {
+            hasCollision.x = true // doesn't matter, hit side of block
+        } else if (topLeftTouching && step.x < 0 && step.y < 0) {
+            hasCollision.x = true // doesn't matter, hit side of block
+        }
+
+        return hasCollision
     }
 
     // Edge touching block
