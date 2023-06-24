@@ -6,4 +6,8 @@ export default class BoolPoint {
         this.x = x;
         this.y = y;
     }
+
+    or(other: BoolPoint) {
+        return new BoolPoint(this.x || other.x, this.y || other.y)
+    }
 }

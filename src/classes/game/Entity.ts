@@ -118,25 +118,23 @@ class Entity {
         const size = roundedVector.isWide() ? roundedVector.width : roundedVector.height
         const step = roundedVector.dividedBy(size)
 
-        let didCollideX = false
-        let didCollideY = false
+        let hasAnyCollisions = new BoolPoint(false, false)
 
-        for (let i = 0; i < size; i++) {
+        for (let i = 0; i <= size; i++) {
+            const hasCollision = this.checkForCollisions(blocks, vector)
+            hasAnyCollisions = hasAnyCollisions.or(hasCollision)
             const currentStep = step.clone()
-            const hasCollision = this.checkForCollisions(blocks, currentStep)
 
             if (hasCollision.x) {
                 currentStep.x = 0
-                didCollideX = true
             }
 
             if (hasCollision.y) {
                 currentStep.y = 0
-                didCollideY = true
             }
 
             if (i === size) {
-                break
+                break // only change position up until last step
             }
 
             this.unroundedPosition.add(currentStep)
@@ -152,18 +150,16 @@ class Entity {
 
         this.unroundedPosition = unroundedFinalPosition
 
-        if (didCollideX) {
+        if (hasAnyCollisions.x) {
             this.unroundedPosition.x = this.position.x // position changed during collision
         }
 
-        if (didCollideY) {
+        if (hasAnyCollisions.y) {
             this.unroundedPosition.y = this.position.y // position changed during collision
         }
-
-        // console.log(this.position, this.unroundedPosition, didCollideX, didCollideY, size)
     }
 
-    checkForCollisions(blocks: Entity[], step: Point) {
+    checkForCollisions(blocks: Entity[], vector: Point) {
         const rightTouching = this.isRightTouching(blocks)
         const leftTouching = this.isLeftTouching(blocks)
         const bottomTouching = this.isBottomTouching(blocks)
@@ -177,43 +173,43 @@ class Entity {
         const hasCollision = new BoolPoint(false, false)
         
         // if moving into wall, stop doing that
-        if (rightTouching && step.x > 0) {
+        if (rightTouching && vector.x > 0) {
             hasCollision.x = true
-        } else if (leftTouching && step.x < 0) {
+        } else if (leftTouching && vector.x < 0) {
             hasCollision.x = true
         }
         
         // if moving into floor or ceiling, stop doing that
-        if (bottomTouching && step.y > 0) {
+        if (bottomTouching && vector.y > 0) {
             hasCollision.y = true
-        } else if (topTouching && step.y < 0) {
+        } else if (topTouching && vector.y < 0) {
             hasCollision.y = true
         }
 
         // if moving into a corner, decide whether to go vertically or horizontally
-        if (bottomRightTouching && step.x > 0) {
+        if (bottomRightTouching && vector.x > 0) {
             if (topRightTouching && this.previousStep.isTall()) {
                 hasCollision.y = true // fall into wall gap
             } else if (bottomLeftTouching && this.previousStep.isWide()) {
                 hasCollision.x = true // walk into floor gap
-            } else if (step.y > 0) {
+            } else if (vector.y > 0) {
                 hasCollision.y = true // fall onto block
             } else {
                 hasCollision.x = true
             }
-        } else if (bottomLeftTouching && step.x < 0) {
+        } else if (bottomLeftTouching && vector.x < 0) {
             if (topLeftTouching && this.previousStep.isTall()) {
                 hasCollision.y = true // fall into wall gap
             } else if (bottomRightTouching && this.previousStep.isWide()) {
                 hasCollision.x = true // walk into floor gap
-            } else if (step.y > 0) {
+            } else if (vector.y > 0) {
                 hasCollision.y = true // fall onto block
             } else {
                 hasCollision.x = true
             }
-        } else if (topRightTouching && step.x > 0 && step.y < 0) {
+        } else if (topRightTouching && vector.x > 0 && vector.y < 0) {
             hasCollision.x = true // doesn't matter, hit side of block
-        } else if (topLeftTouching && step.x < 0 && step.y < 0) {
+        } else if (topLeftTouching && vector.x < 0 && vector.y < 0) {
             hasCollision.x = true // doesn't matter, hit side of block
         }
 
