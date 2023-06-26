@@ -1,62 +1,73 @@
 import { useEffect, useState } from 'react'
 import '../styles/Game.scss'
-import Point from '../classes/game/Point'
 import Level from '../classes/game/Level'
 import levels from '../data/levels.json'
-
-const level = Level.fromTemplate(levels[2], {
-    topWall: true,
-    leftWall: true,
-    windowSquares: new Point(5, 6),
-    defaultPlayerSquare: new Point(2, 3)
-})
+import { PLAYER_SQUARE, WINDOW_SQUARES } from '../classes/config/Defaults'
 
 let animating = false;
 
-function handleKeydown(event: KeyboardEvent) {
-    switch (event.key) {
-        case 'ArrowLeft':
-            level.player.startMovingLeft();
-            break;
-        case 'ArrowRight':
-            level.player.startMovingRight();
-            break;
-        case 'ArrowUp':
-            level.player.startJumping(level.getVisibleBlocks());
-            break;
-    }
-}
-
-function handleKeyup(event: KeyboardEvent) {
-    switch (event.key) {
-        case 'ArrowLeft':
-            level.player.stopMovingLeft();
-            break;
-        case 'ArrowRight':
-            level.player.stopMovingRight();
-            break;
-        case 'ArrowUp':
-            level.player.stopJumping(level.getVisibleBlocks());
-            break;
-    }
+function getLevel(index: number) {
+    return Level.fromTemplate(levels[index], {
+        topWall: true,
+        leftWall: true,
+        bottomWall: true,
+        windowSquares: WINDOW_SQUARES,
+        defaultPlayerSquare: PLAYER_SQUARE
+    })
 }
 
 export default function Game() {
     const [, setTimestamp] = useState(0)
+    const [levelIndex, setLevelIndex] = useState(0)
+    const [level, setLevel] = useState(getLevel(levelIndex))
 
     const gameLoop = (timestamp: number) => {
         level.update(timestamp)
         setTimestamp(timestamp)
 
-        requestAnimationFrame(gameLoop)
+        if (level.isComplete()) {
+            animating = false
+            setLevel(getLevel(levelIndex + 1))
+            setLevelIndex(levelIndex + 1)
+        } else {
+            requestAnimationFrame(gameLoop)
+        }
     }
 
     useEffect(() => {
         if (!animating) {
             requestAnimationFrame(gameLoop)
-            animating = true;
+            animating = true
         }
-    }, [])
+    }, [level])
+
+    function handleKeydown(event: KeyboardEvent) {
+        switch (event.key) {
+            case 'ArrowLeft':
+                level.player.startMovingLeft();
+                break;
+            case 'ArrowRight':
+                level.player.startMovingRight();
+                break;
+            case 'ArrowUp':
+                level.player.startJumping(level.getVisibleBlocks());
+                break;
+        }
+    }
+    
+    function handleKeyup(event: KeyboardEvent) {
+        switch (event.key) {
+            case 'ArrowLeft':
+                level.player.stopMovingLeft();
+                break;
+            case 'ArrowRight':
+                level.player.stopMovingRight();
+                break;
+            case 'ArrowUp':
+                level.player.stopJumping(level.getVisibleBlocks());
+                break;
+        }
+    }
 
     useEffect(() => {
         document.addEventListener('keydown', handleKeydown)
@@ -66,11 +77,11 @@ export default function Game() {
             document.removeEventListener('keydown', handleKeydown)
             document.removeEventListener('keyup', handleKeyup)
         }
-    }, [])
+    }, [level])
 
     return <div className="level-card">
         <div className="level-caption">
-            Sidle 1 6/6
+            Sidle {levelIndex + 1}/{levels.length}
         </div>
         <div className="level" style={level.style}>
             {level.getVisibleEntities().map((entity, index) => 

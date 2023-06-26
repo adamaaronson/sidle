@@ -19,7 +19,7 @@ export default class Level {
     squareSize: number
     windowSize: Point
     defaultPlayerPosition: Point
-    playerDisplayPositionCache: Map<Point, Point> = new Map()
+    playerDisplayPositionCache: Map<Point, Point>
 
     constructor(player: MultiPlayer, blocks: Block[], background: Block[], settings?: LevelSettings) {
         this.player = player
@@ -37,6 +37,8 @@ export default class Level {
                 .minus(this.player.size.times(0.5))                                        // offset by half of the player size
                 .plus(new Point(this.squareSize, this.squareSize).times(0.5))              // offset by half of the square size
                 ?? this.playerCenter
+        
+        this.playerDisplayPositionCache = new Map()
     }
 
     static fromTemplate(grid: string[], settings?: LevelSettings) {
@@ -105,7 +107,8 @@ export default class Level {
     get style() {
         return {
             width: this.windowSize.x,
-            height: this.windowSize.y
+            height: this.windowSize.y,
+            opacity: this.getVisibility(this.player)
         }
     }
 
@@ -142,9 +145,14 @@ export default class Level {
     }
 
     update(timestamp: number) {
+        // console.log(this.getEntityDisplayPosition(this.player))
         if (this.isVisible(this.player)) {
             this.player.update(timestamp, this.getVisibleBlocks())
         }
+    }
+
+    isComplete() {
+        return !this.isVisible(this.player)
     }
 
     getPlayerDisplayPosition() {
@@ -206,6 +214,15 @@ export default class Level {
             topLeft.x <= this.windowSize.x &&
             topLeft.y <= this.windowSize.y
         )
+    }
+
+    getVisibility(entity: Entity) {
+        const displayWidth = Math.min(entity.right, this.right) - Math.min(entity.left, this.right)
+        
+        const displayArea = displayWidth * entity.height
+        const entityArea = entity.width * entity.height
+
+        return displayArea / entityArea
     }
 
     static createPlayerSubentity(squareSize: number, position: Point) {
