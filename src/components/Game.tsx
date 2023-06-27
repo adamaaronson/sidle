@@ -20,7 +20,7 @@ function getLevel(index: number, playerIsMovingRight: boolean, playerIsJumping: 
 
 export default function Game() {
     const [, setTimestamp] = useState(0)
-    const [levelIndex, setLevelIndex] = useState(3)
+    const [levelIndex, setLevelIndex] = useState(5)
     const [level, setLevel] = useState(getLevel(levelIndex, false, false))
 
     const gameLoop = (timestamp: number) => {
