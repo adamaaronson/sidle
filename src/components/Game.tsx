@@ -6,11 +6,13 @@ import { PLAYER_SQUARE, WINDOW_SQUARES } from '../classes/config/Defaults'
 
 let animating = false;
 
-function getLevel(index: number) {
+function getLevel(index: number, playerIsMovingRight: boolean, playerIsJumping: boolean) {
     return Level.fromTemplate(levels[index], {
         topWall: true,
         leftWall: true,
         bottomWall: true,
+        playerIsMovingRight: playerIsMovingRight,
+        playerIsJumping: playerIsJumping,
         windowSquares: WINDOW_SQUARES,
         defaultPlayerSquare: PLAYER_SQUARE
     })
@@ -18,16 +20,18 @@ function getLevel(index: number) {
 
 export default function Game() {
     const [, setTimestamp] = useState(0)
-    const [levelIndex, setLevelIndex] = useState(0)
-    const [level, setLevel] = useState(getLevel(levelIndex))
+    const [levelIndex, setLevelIndex] = useState(3)
+    const [level, setLevel] = useState(getLevel(levelIndex, false, false))
 
     const gameLoop = (timestamp: number) => {
         level.update(timestamp)
         setTimestamp(timestamp)
 
+        // console.log(level.player.isMovingRight, level.player.isJumping)
+
         if (level.isComplete()) {
             animating = false
-            setLevel(getLevel(levelIndex + 1))
+            setLevel(getLevel(levelIndex + 1, level.player.isMovingRight, level.player.isJumping))
             setLevelIndex(levelIndex + 1)
         } else {
             requestAnimationFrame(gameLoop)

@@ -5,6 +5,9 @@ type LevelSettings = {
     rightWall?: boolean
     topWall?: boolean
     bottomWall?: boolean
+
+    playerIsMovingRight?: boolean
+    playerIsJumping?: boolean
     
     squareSize?: number
     windowSquares?: Point

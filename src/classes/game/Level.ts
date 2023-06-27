@@ -38,6 +38,16 @@ export default class Level {
                 .plus(new Point(this.squareSize, this.squareSize).times(0.5))              // offset by half of the square size
                 ?? this.playerCenter
         
+        if (settings?.playerIsJumping) {
+            console.log('player is jumping')
+            player.isJumping = true
+        }
+
+        if (settings?.playerIsMovingRight) {
+            console.log('player is moving right')
+            player.isMovingRight = true
+        }
+        
         this.playerDisplayPositionCache = new Map()
     }
 
