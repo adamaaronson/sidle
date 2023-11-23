@@ -39,12 +39,10 @@ export default class Level {
                 ?? this.playerCenter
         
         if (settings?.playerIsJumping) {
-            console.log('player is jumping')
             player.isJumping = true
         }
 
         if (settings?.playerIsMovingRight) {
-            console.log('player is moving right')
             player.isMovingRight = true
         }
         

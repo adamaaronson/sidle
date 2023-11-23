@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import '../styles/Game.scss'
 import Level from '../classes/game/Level'
+import Debug from './Debug'
 import levels from '../data/levels.json'
 import { PLAYER_SQUARE, WINDOW_SQUARES } from '../classes/config/Defaults'
 
@@ -83,22 +84,25 @@ export default function Game() {
         }
     }, [level])
 
-    return <div className="level-card">
-        <div className="level-caption">
-            Sidle {levelIndex + 1}/{levels.length}
-        </div>
-        <div className="level" style={level.style}>
-            {level.getVisibleEntities().map((entity, index) => 
-                <div
-                    className="entity"
-                    key={index}
-                    style={level.getEntityStyle(entity)}
-                >
-                    <div className="entity-text" style={entity.textStyle}>
-                        {entity.text}
+    return <div>
+        <Debug level={level} />
+        <div className="level-card">
+            <div className="level-caption">
+                Sidle {levelIndex + 1}/{levels.length}
+            </div>
+            <div className="level" style={level.style}>
+                {level.getVisibleEntities().map((entity, index) => 
+                    <div
+                        className="entity"
+                        key={index}
+                        style={level.getEntityStyle(entity)}
+                    >
+                        <div className="entity-text" style={entity.textStyle}>
+                            {entity.text}
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     </div>
 }

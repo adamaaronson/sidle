@@ -116,6 +116,9 @@ class Entity {
         const roundedVector = roundedFinalPosition.minus(roundedInitialPosition)
 
         const size = roundedVector.isWide() ? roundedVector.width : roundedVector.height
+        if (size === 0) {
+            return // no motion to interpolate
+        }
         const step = roundedVector.dividedBy(size)
 
         let hasAnyCollisions = new BoolPoint(false, false)
