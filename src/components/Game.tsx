@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
-import '../styles/Game.scss'
-import Level from '../classes/game/Level'
-import Debug from './Debug'
-import levels from '../data/levels.json'
-import { PLAYER_SQUARE, WINDOW_SQUARES } from '../classes/config/Defaults'
+import { useEffect, useState } from 'react';
+import '../styles/Game.scss';
+import Level from '../classes/game/Level';
+import Debug from './Debug';
+import levels from '../data/levels.json';
+import { PLAYER_SQUARE, WINDOW_SQUARES } from '../classes/config/Defaults';
 
 let animating = false;
 
@@ -15,36 +15,36 @@ function getLevel(index: number, playerIsMovingRight: boolean, playerIsJumping: 
         playerIsMovingRight: playerIsMovingRight,
         playerIsJumping: playerIsJumping,
         windowSquares: WINDOW_SQUARES,
-        defaultPlayerSquare: PLAYER_SQUARE
-    })
+        defaultPlayerSquare: PLAYER_SQUARE,
+    });
 }
 
 export default function Game() {
-    const [, setTimestamp] = useState(0)
-    const [levelIndex, setLevelIndex] = useState(5)
-    const [level, setLevel] = useState(getLevel(levelIndex, false, false))
+    const [, setTimestamp] = useState(0);
+    const [levelIndex, setLevelIndex] = useState(5);
+    const [level, setLevel] = useState(getLevel(levelIndex, false, false));
 
     const gameLoop = (timestamp: number) => {
-        level.update(timestamp)
-        setTimestamp(timestamp)
+        level.update(timestamp);
+        setTimestamp(timestamp);
 
         // console.log(level.player.isMovingRight, level.player.isJumping)
 
         if (level.isComplete()) {
-            animating = false
-            setLevel(getLevel(levelIndex + 1, level.player.isMovingRight, level.player.isJumping))
-            setLevelIndex(levelIndex + 1)
+            animating = false;
+            setLevel(getLevel(levelIndex + 1, level.player.isMovingRight, level.player.isJumping));
+            setLevelIndex(levelIndex + 1);
         } else {
-            requestAnimationFrame(gameLoop)
+            requestAnimationFrame(gameLoop);
         }
-    }
+    };
 
     useEffect(() => {
         if (!animating) {
-            requestAnimationFrame(gameLoop)
-            animating = true
+            requestAnimationFrame(gameLoop);
+            animating = true;
         }
-    }, [level])
+    }, [level]);
 
     function handleKeydown(event: KeyboardEvent) {
         switch (event.key) {
@@ -59,7 +59,7 @@ export default function Game() {
                 break;
         }
     }
-    
+
     function handleKeyup(event: KeyboardEvent) {
         switch (event.key) {
             case 'ArrowLeft':
@@ -75,34 +75,32 @@ export default function Game() {
     }
 
     useEffect(() => {
-        document.addEventListener('keydown', handleKeydown)
-        document.addEventListener('keyup', handleKeyup)
+        document.addEventListener('keydown', handleKeydown);
+        document.addEventListener('keyup', handleKeyup);
 
         return () => {
-            document.removeEventListener('keydown', handleKeydown)
-            document.removeEventListener('keyup', handleKeyup)
-        }
-    }, [level])
+            document.removeEventListener('keydown', handleKeydown);
+            document.removeEventListener('keyup', handleKeyup);
+        };
+    }, [level]);
 
-    return <div>
-        <Debug level={level} />
-        <div className="level-card">
-            <div className="level-caption">
-                Sidle {levelIndex + 1}/{levels.length}
-            </div>
-            <div className="level" style={level.style}>
-                {level.getVisibleEntities().map((entity, index) => 
-                    <div
-                        className="entity"
-                        key={index}
-                        style={level.getEntityStyle(entity)}
-                    >
-                        <div className="entity-text" style={entity.textStyle}>
-                            {entity.text}
+    return (
+        <div>
+            <Debug level={level} />
+            <div className="level-card">
+                <div className="level-caption">
+                    Sidle {levelIndex + 1}/{levels.length}
+                </div>
+                <div className="level" style={level.style}>
+                    {level.getVisibleEntities().map((entity, index) => (
+                        <div className="entity" key={index} style={level.getEntityStyle(entity)}>
+                            <div className="entity-text" style={entity.textStyle}>
+                                {entity.text}
+                            </div>
                         </div>
-                    </div>
-                )}
+                    ))}
+                </div>
             </div>
         </div>
-    </div>
+    );
 }

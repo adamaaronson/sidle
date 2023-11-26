@@ -1,6 +1,6 @@
 enum Symbol {
     Player = 'O',
-    Block = '.'
+    Block = '.',
 }
 
 export default Symbol;

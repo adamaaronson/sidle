@@ -1,17 +1,17 @@
-import Point from "../game/Point";
+import Point from '../game/Point';
 
 type LevelSettings = {
-    leftWall?: boolean
-    rightWall?: boolean
-    topWall?: boolean
-    bottomWall?: boolean
+    leftWall?: boolean;
+    rightWall?: boolean;
+    topWall?: boolean;
+    bottomWall?: boolean;
 
-    playerIsMovingRight?: boolean
-    playerIsJumping?: boolean
-    
-    squareSize?: number
-    windowSquares?: Point
-    defaultPlayerSquare?: Point
-}
+    playerIsMovingRight?: boolean;
+    playerIsJumping?: boolean;
+
+    squareSize?: number;
+    windowSquares?: Point;
+    defaultPlayerSquare?: Point;
+};
 
 export default LevelSettings;

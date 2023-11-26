@@ -1,6 +1,6 @@
 export default class BoolPoint {
-    x: boolean
-    y: boolean
+    x: boolean;
+    y: boolean;
 
     constructor(x: boolean, y: boolean) {
         this.x = x;
@@ -8,6 +8,6 @@ export default class BoolPoint {
     }
 
     or(other: BoolPoint) {
-        return new BoolPoint(this.x || other.x, this.y || other.y)
+        return new BoolPoint(this.x || other.x, this.y || other.y);
     }
 }

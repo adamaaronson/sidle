@@ -1,4 +1,4 @@
-import Point from "../game/Point";
+import Point from '../game/Point';
 
 type EntitySettings = {
     size?: Point;
@@ -7,9 +7,9 @@ type EntitySettings = {
     acceleration?: Point;
     color?: string;
     text?: string;
-    
+
     walkingSpeed?: number;
     jumpingSpeed?: number;
-}
+};
 
 export default EntitySettings;
