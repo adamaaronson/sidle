@@ -1,5 +1,5 @@
-import EntitySettings from '../config/EntitySettings';
 import Block from './Block';
+import type { EntitySettings } from './Entity';
 import Entity from './Entity';
 import Player from './Player';
 import Point from './Point';
@@ -13,14 +13,6 @@ export default class MultiPlayer extends Player {
         this.position = new Point(this.left, this.top);
         this.unroundedPosition = this.position.clone();
         this.size = new Point(this.width, this.height);
-    }
-
-    override setPosition(newPosition: Point) {
-        const initialPosition = this.position;
-        const dPosition = newPosition.minus(initialPosition);
-
-        this.subentities.forEach((entity) => entity.position.add(dPosition));
-        this.position = newPosition;
     }
 
     override get width() {

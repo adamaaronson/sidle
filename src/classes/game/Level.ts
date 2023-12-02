@@ -1,10 +1,23 @@
 import { SQUARE_SIZE, WALL_SIZE } from '../config/Defaults';
-import LevelSettings from '../config/LevelSettings';
 import Symbol from '../config/Symbol';
 import Block from './Block';
 import Entity from './Entity';
 import MultiPlayer from './MultiPlayer';
 import Point from './Point';
+
+export type LevelSettings = {
+    leftWall?: boolean;
+    rightWall?: boolean;
+    topWall?: boolean;
+    bottomWall?: boolean;
+
+    playerIsMovingRight?: boolean;
+    playerIsJumping?: boolean;
+
+    squareSize?: number;
+    windowSquares?: Point;
+    defaultPlayerSquare?: Point;
+};
 
 export default class Level {
     player: MultiPlayer;

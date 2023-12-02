@@ -1,7 +1,19 @@
 import { BACKGROUND_COLOR, GRAVITY, SQUARE_SIZE } from '../config/Defaults';
-import EntitySettings from '../config/EntitySettings';
 import BoolPoint from './BoolPoint';
 import Point from './Point';
+
+export type EntitySettings = {
+    size?: Point;
+    position?: Point;
+    velocity?: Point;
+    acceleration?: Point;
+    color?: string;
+    text?: string;
+    subentities?: Entity[];
+
+    walkingSpeed?: number;
+    jumpingSpeed?: number;
+};
 
 class Entity {
     size: Point;
@@ -10,6 +22,7 @@ class Entity {
     acceleration: Point;
     color: string;
     text: string;
+    subentities: Entity[];
 
     lastUpdated: number;
     unroundedPosition: Point;
@@ -22,6 +35,7 @@ class Entity {
         this.acceleration = settings?.acceleration ?? new Point(0, GRAVITY);
         this.color = settings?.color ?? BACKGROUND_COLOR;
         this.text = settings?.text ?? '';
+        this.subentities = settings?.subentities ?? [];
 
         this.lastUpdated = performance.now();
         this.unroundedPosition = this.position.clone();
@@ -73,7 +87,19 @@ class Entity {
     }
 
     setPosition(newPosition: Point) {
+        const initialPosition = this.position.clone();
+        const dPosition = newPosition.minus(initialPosition);
+
+        this.subentities.forEach((entity) => entity.position.add(dPosition));
         this.position = newPosition;
+    }
+
+    setUnroundedPosition(newUnroundedPosition: Point) {
+        const initialUnroundedPosition = this.unroundedPosition.clone();
+        const dUnroundedPosition = newUnroundedPosition.minus(initialUnroundedPosition);
+
+        this.subentities.forEach((entity) => entity.unroundedPosition.add(dUnroundedPosition));
+        this.unroundedPosition = newUnroundedPosition;
     }
 
     update(timestamp: number, blocks: Entity[]) {
@@ -135,27 +161,29 @@ class Entity {
 
             if (i === size) {
                 break; // only change position up until last step
-            }
+            } // TODO: this seems wrong
 
-            this.unroundedPosition.add(currentStep);
+            this.setUnroundedPosition(this.unroundedPosition.plus(currentStep));
 
             const nextPosition = this.unroundedPosition.rounded();
-            const delta = nextPosition.minus(this.position);
-            if (!delta.isZero()) {
-                this.previousStep = delta;
+            const dPosition = nextPosition.minus(this.position);
+            if (!dPosition.isZero()) {
+                this.previousStep = dPosition;
             }
 
             this.setPosition(nextPosition);
         }
 
-        this.unroundedPosition = unroundedFinalPosition;
+        this.setUnroundedPosition(unroundedFinalPosition);
 
         if (hasAnyCollisions.x) {
-            this.unroundedPosition.x = this.position.x; // position changed during collision
+            // position changed during collision
+            this.setUnroundedPosition(this.unroundedPosition.butWithX(this.position.x));
         }
 
         if (hasAnyCollisions.y) {
-            this.unroundedPosition.y = this.position.y; // position changed during collision
+            // position changed during collision
+            this.setUnroundedPosition(this.unroundedPosition.butWithY(this.position.y));
         }
     }
 

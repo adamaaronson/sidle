@@ -15,6 +15,10 @@ export default function Debug({ level }: Props) {
         'velocity y': level.player.velocity.y,
         'acceleration x': level.player.acceleration.x,
         'acceleration y': level.player.acceleration.y,
+        'subentity xs': level.player.subentities.map((subentity) => subentity.position.x).join(', '),
+        'subentity ys': level.player.subentities.map((subentity) => subentity.position.y).join(', '),
+        'subentity unrounded xs': level.player.subentities.map((subentity) => subentity.unroundedPosition.x).join(', '),
+        'subentity unrounded ys': level.player.subentities.map((subentity) => subentity.unroundedPosition.y).join(', '),
     };
 
     const debugConditions = {

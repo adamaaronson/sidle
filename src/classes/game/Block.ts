@@ -1,5 +1,5 @@
 import Entity from './Entity';
-import EntitySettings from '../config/EntitySettings';
+import type { EntitySettings } from './Entity';
 import Point from './Point';
 
 export default class Block extends Entity {

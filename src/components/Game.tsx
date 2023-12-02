@@ -21,14 +21,12 @@ function getLevel(index: number, playerIsMovingRight: boolean, playerIsJumping: 
 
 export default function Game() {
     const [, setTimestamp] = useState(0);
-    const [levelIndex, setLevelIndex] = useState(5);
+    const [levelIndex, setLevelIndex] = useState(6);
     const [level, setLevel] = useState(getLevel(levelIndex, false, false));
 
     const gameLoop = (timestamp: number) => {
         level.update(timestamp);
         setTimestamp(timestamp);
-
-        // console.log(level.player.isMovingRight, level.player.isJumping)
 
         if (level.isComplete()) {
             animating = false;

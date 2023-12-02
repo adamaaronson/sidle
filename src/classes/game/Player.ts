@@ -1,6 +1,6 @@
 import { JUMPING_SPEED, WALKING_SPEED } from '../config/Defaults';
 import Entity from './Entity';
-import EntitySettings from '../config/EntitySettings';
+import type { EntitySettings } from './Entity';
 
 export default class Player extends Entity {
     walkingSpeed: number;

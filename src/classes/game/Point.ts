@@ -80,6 +80,14 @@ export default class Point {
         return this.x === 0 && this.y === 0;
     }
 
+    butWithX(x: number) {
+        return new Point(x, this.y);
+    }
+
+    butWithY(y: number) {
+        return new Point(this.x, y);
+    }
+
     static zero() {
         return new Point(0, 0);
     }
