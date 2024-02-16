@@ -124,17 +124,17 @@ class Entity {
         const roundedVector = roundedFinalPosition.minus(this.position);
 
         const size = roundedVector.isWide() ? roundedVector.width : roundedVector.height;
-        if (size === 0) {
-            this.unroundedPosition = unroundedFinalPosition;
-            return; // no motion to interpolate TODO: this might be wrong
-        }
+        // if (size === 0) {
+        //     this.unroundedPosition = unroundedFinalPosition;
+        //     return; // no motion to interpolate TODO: this might be wrong, moves down when grounded
+        // }
         const step = roundedVector.dividedBy(size);
 
-        let hasAnyCollisions = new BoolPoint(false, false);
+        let hasAnyCollisions = BoolPoint.false();
+        let hasCollision = this.checkForCollisions(blocks, vector);
+        hasAnyCollisions = hasAnyCollisions.or(hasCollision);
 
         for (let i = 0; i < size; i++) {
-            const hasCollision = this.checkForCollisions(blocks, vector);
-            hasAnyCollisions = hasAnyCollisions.or(hasCollision);
             const currentStep = step.clone();
 
             if (hasCollision.x) {
@@ -145,10 +145,6 @@ class Entity {
                 currentStep.y = 0;
             }
 
-            if (i === size) {
-                break; // only change position up until last step
-            } // TODO: no way this is right
-
             this.unroundedPosition.add(currentStep);
 
             const nextPosition = this.unroundedPosition.rounded();
@@ -158,6 +154,8 @@ class Entity {
             }
 
             this.position = nextPosition;
+            hasCollision = this.checkForCollisions(blocks, vector);
+            hasAnyCollisions = hasAnyCollisions.or(hasCollision);
         }
 
         this.unroundedPosition = unroundedFinalPosition;

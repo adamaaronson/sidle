@@ -73,8 +73,8 @@ export default class Level {
         let blocks: Block[] = [];
         let background: Block[] = [];
 
-        let playerTopLeft;
-        let playerBottomRight;
+        let playerTopLeft = new Point(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER);
+        let playerBottomRight = new Point(Number.MIN_SAFE_INTEGER, Number.MIN_SAFE_INTEGER);
 
         // add entities from template
         for (let row = 0; row < grid.length; row++) {
@@ -86,15 +86,13 @@ export default class Level {
                         blocks.push(Level.createBlock(squareSize, position));
                         break;
                     case Symbol.Player:
-                        const subentity = Level.createPlayerSubentity(player, squareSize, position.clone());
-                        if (!playerTopLeft) {
-                            playerTopLeft = position;
-                            player.position = playerTopLeft;
-                            player.unroundedPosition = playerTopLeft.clone();
-                        }
-                        playerBottomRight = position.plus(new Point(squareSize, squareSize));
-                        subentity.position.subtract(playerTopLeft);
-                        player.subentities.push(subentity);
+                        player.subentities.push(Level.createPlayerSubentity(player, squareSize, position.clone()));
+
+                        playerTopLeft = Point.min(playerTopLeft, position);
+                        playerBottomRight = Point.max(
+                            playerBottomRight,
+                            position.plus(new Point(squareSize, squareSize)),
+                        );
 
                         background.push(Level.createBackgroundBlock(squareSize, position.clone()));
                         break;
@@ -104,11 +102,14 @@ export default class Level {
             }
         }
 
-        if (!playerTopLeft || !playerBottomRight) {
-            throw new Error('No player found.');
-        }
-
+        // process player and player subentity positions
+        player.position = playerTopLeft;
+        player.unroundedPosition = player.position.clone();
         player.size = playerBottomRight.minus(playerTopLeft);
+
+        for (const subentity of player.subentities) {
+            subentity.position.subtract(playerTopLeft);
+        }
 
         // add walls if specified
         if (settings?.topWall) {
@@ -184,7 +185,6 @@ export default class Level {
     }
 
     update(timestamp: number) {
-        // console.log(this.getEntityDisplayPosition(this.player))
         if (this.isVisible(this.player)) {
             this.player.update(timestamp, this.getVisibleBlocks());
         }

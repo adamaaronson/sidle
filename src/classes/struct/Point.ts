@@ -93,6 +93,14 @@ export default class Point {
         return new Point(this.x, y);
     }
 
+    static min(...points: Point[]) {
+        return new Point(Math.min(...points.map((point) => point.x)), Math.min(...points.map((point) => point.y)));
+    }
+
+    static max(...points: Point[]) {
+        return new Point(Math.max(...points.map((point) => point.x)), Math.max(...points.map((point) => point.y)));
+    }
+
     static zero() {
         return new Point(0, 0);
     }

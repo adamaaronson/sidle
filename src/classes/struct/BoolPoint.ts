@@ -10,4 +10,8 @@ export default class BoolPoint {
     or(other: BoolPoint) {
         return new BoolPoint(this.x || other.x, this.y || other.y);
     }
+
+    static false() {
+        return new BoolPoint(false, false);
+    }
 }
