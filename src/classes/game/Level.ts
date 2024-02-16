@@ -2,8 +2,9 @@ import { SQUARE_SIZE, WALL_SIZE } from '../config/Defaults';
 import Symbol from '../config/Symbol';
 import Block from './Block';
 import Entity from './Entity';
-import MultiPlayer from './MultiPlayer';
+import Player from './Player';
 import Point from './Point';
+import Subentity from './Subentity';
 
 export type LevelSettings = {
     leftWall?: boolean;
@@ -20,7 +21,7 @@ export type LevelSettings = {
 };
 
 export default class Level {
-    player: MultiPlayer;
+    player: Player;
     blocks: Block[];
     background: Block[];
 
@@ -34,7 +35,7 @@ export default class Level {
     defaultPlayerPosition: Point;
     playerDisplayPositionCache: Map<Point, Point>;
 
-    constructor(player: MultiPlayer, blocks: Block[], background: Block[], settings?: LevelSettings) {
+    constructor(player: Player, blocks: Block[], background: Block[], settings?: LevelSettings) {
         this.player = player;
         this.blocks = blocks;
         this.background = background;
@@ -68,7 +69,7 @@ export default class Level {
         const width = grid[0].length * squareSize;
         const height = grid.length * squareSize;
 
-        let playerSubentities: Block[] = [];
+        let player = new Player({ position: Point.zero() });
         let blocks: Block[] = [];
         let background: Block[] = [];
 
@@ -82,7 +83,7 @@ export default class Level {
                         blocks.push(Level.createBlock(squareSize, position));
                         break;
                     case Symbol.Player:
-                        playerSubentities.push(Level.createPlayerSubentity(squareSize, position.clone()));
+                        player.subentities.push(Level.createPlayerSubentity(player, squareSize, position.clone()));
                         background.push(Level.createBackgroundBlock(squareSize, position.clone()));
                         break;
                     default:
@@ -129,12 +130,10 @@ export default class Level {
             );
         }
 
-        let player = new MultiPlayer(playerSubentities);
-
         return new Level(player, blocks, background, settings);
     }
 
-    get style() {
+    get style(): React.CSSProperties {
         return {
             width: this.windowSize.x,
             height: this.windowSize.y,
@@ -244,8 +243,8 @@ export default class Level {
         return displayArea / entityArea;
     }
 
-    static createPlayerSubentity(squareSize: number, position: Point) {
-        return new Block({
+    static createPlayerSubentity(player: Player, squareSize: number, position: Point) {
+        return new Subentity(player, {
             size: new Point(squareSize, squareSize),
             position: position,
             text: '🟨',

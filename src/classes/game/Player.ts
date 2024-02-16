@@ -2,6 +2,11 @@ import { JUMPING_SPEED, WALKING_SPEED } from '../config/Defaults';
 import Entity from './Entity';
 import type { EntitySettings } from './Entity';
 
+export interface PlayerSettings extends EntitySettings {
+    walkingSpeed?: number;
+    jumpingSpeed?: number;
+}
+
 export default class Player extends Entity {
     walkingSpeed: number;
     jumpingSpeed: number;
@@ -9,7 +14,7 @@ export default class Player extends Entity {
     isMovingRight: boolean = false;
     isJumping: boolean = false;
 
-    constructor(settings?: EntitySettings) {
+    constructor(settings?: PlayerSettings) {
         super(settings);
         this.walkingSpeed = settings?.walkingSpeed ?? WALKING_SPEED;
         this.jumpingSpeed = settings?.jumpingSpeed ?? JUMPING_SPEED;

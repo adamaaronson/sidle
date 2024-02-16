@@ -1,19 +1,17 @@
 import { BACKGROUND_COLOR, GRAVITY, SQUARE_SIZE } from '../config/Defaults';
 import BoolPoint from './BoolPoint';
 import Point from './Point';
+import Subentity from './Subentity';
 
-export type EntitySettings = {
+export interface EntitySettings {
     size?: Point;
     position?: Point;
     velocity?: Point;
     acceleration?: Point;
     color?: string;
     text?: string;
-    subentities?: Entity[];
-
-    walkingSpeed?: number;
-    jumpingSpeed?: number;
-};
+    subentities?: Subentity[];
+}
 
 class Entity {
     size: Point;
@@ -22,7 +20,7 @@ class Entity {
     acceleration: Point;
     color: string;
     text: string;
-    subentities: Entity[];
+    subentities: Subentity[];
 
     lastUpdated: number;
     unroundedPosition: Point;
@@ -66,11 +64,7 @@ class Entity {
         return Math.round(this.position.y + this.size.y);
     }
 
-    get center() {
-        return new Point(Math.round(this.position.x + this.size.x / 2), Math.round(this.position.y + this.size.y / 2));
-    }
-
-    get style() {
+    get style(): React.CSSProperties {
         return {
             top: this.top,
             left: this.left,
@@ -80,26 +74,18 @@ class Entity {
         };
     }
 
-    get textStyle() {
+    get textStyle(): React.CSSProperties {
         return {
             fontSize: `${this.width * 0.94}px`,
         };
     }
 
-    setPosition(newPosition: Point) {
-        const initialPosition = this.position.clone();
-        const dPosition = newPosition.minus(initialPosition);
-
-        this.subentities.forEach((entity) => entity.position.add(dPosition));
-        this.position = newPosition;
+    hasSubentities() {
+        return this.subentities && this.subentities.length > 0;
     }
 
-    setUnroundedPosition(newUnroundedPosition: Point) {
-        const initialUnroundedPosition = this.unroundedPosition.clone();
-        const dUnroundedPosition = newUnroundedPosition.minus(initialUnroundedPosition);
-
-        this.subentities.forEach((entity) => entity.unroundedPosition.add(dUnroundedPosition));
-        this.unroundedPosition = newUnroundedPosition;
+    getSubentityPosition(relativePosition: Point) {
+        return this.position.plus(relativePosition);
     }
 
     update(timestamp: number, blocks: Entity[]) {
@@ -133,20 +119,20 @@ class Entity {
 
     // https://en.wikipedia.org/wiki/Digital_differential_analyzer_(graphics_algorithm)
     interpolatePosition(vector: Point, blocks: Entity[]) {
-        const roundedInitialPosition = this.position.clone();
         const unroundedFinalPosition = this.unroundedPosition.plus(vector);
         const roundedFinalPosition = unroundedFinalPosition.rounded();
-        const roundedVector = roundedFinalPosition.minus(roundedInitialPosition);
+        const roundedVector = roundedFinalPosition.minus(this.position);
 
         const size = roundedVector.isWide() ? roundedVector.width : roundedVector.height;
         if (size === 0) {
-            return; // no motion to interpolate
+            this.unroundedPosition = unroundedFinalPosition;
+            return; // no motion to interpolate TODO: this might be wrong
         }
         const step = roundedVector.dividedBy(size);
 
         let hasAnyCollisions = new BoolPoint(false, false);
 
-        for (let i = 0; i <= size; i++) {
+        for (let i = 0; i < size; i++) {
             const hasCollision = this.checkForCollisions(blocks, vector);
             hasAnyCollisions = hasAnyCollisions.or(hasCollision);
             const currentStep = step.clone();
@@ -161,9 +147,9 @@ class Entity {
 
             if (i === size) {
                 break; // only change position up until last step
-            } // TODO: this seems wrong
+            } // TODO: no way this is right
 
-            this.setUnroundedPosition(this.unroundedPosition.plus(currentStep));
+            this.unroundedPosition.add(currentStep);
 
             const nextPosition = this.unroundedPosition.rounded();
             const dPosition = nextPosition.minus(this.position);
@@ -171,19 +157,19 @@ class Entity {
                 this.previousStep = dPosition;
             }
 
-            this.setPosition(nextPosition);
+            this.position = nextPosition;
         }
 
-        this.setUnroundedPosition(unroundedFinalPosition);
+        this.unroundedPosition = unroundedFinalPosition;
 
         if (hasAnyCollisions.x) {
             // position changed during collision
-            this.setUnroundedPosition(this.unroundedPosition.butWithX(this.position.x));
+            this.unroundedPosition.x = this.position.x;
         }
 
         if (hasAnyCollisions.y) {
             // position changed during collision
-            this.setUnroundedPosition(this.unroundedPosition.butWithY(this.position.y));
+            this.unroundedPosition.y = this.position.y;
         }
     }
 
@@ -245,38 +231,62 @@ class Entity {
     }
 
     // Edge touching block
-
-    isTopTouching(blocks: Entity[]) {
+    // TODO: add subentity functionality for these functions
+    isTopTouching(blocks: Entity[]): boolean {
+        if (this.hasSubentities()) {
+            return this.subentities.some((entity) => entity.isTopTouching(blocks));
+        }
         return blocks.some((block) => this.top === block.bottom && this.right > block.left && this.left < block.right);
     }
 
-    isBottomTouching(blocks: Entity[]) {
+    isBottomTouching(blocks: Entity[]): boolean {
+        if (this.hasSubentities()) {
+            return this.subentities.some((entity) => entity.isBottomTouching(blocks));
+        }
         return blocks.some((block) => this.bottom === block.top && this.right > block.left && this.left < block.right);
     }
 
-    isLeftTouching(blocks: Entity[]) {
+    isLeftTouching(blocks: Entity[]): boolean {
+        if (this.hasSubentities()) {
+            return this.subentities.some((entity) => entity.isLeftTouching(blocks));
+        }
         return blocks.some((block) => this.left === block.right && this.bottom > block.top && this.top < block.bottom);
     }
 
-    isRightTouching(blocks: Entity[]) {
+    isRightTouching(blocks: Entity[]): boolean {
+        if (this.hasSubentities()) {
+            return this.subentities.some((entity) => entity.isRightTouching(blocks));
+        }
         return blocks.some((block) => this.right === block.left && this.bottom > block.top && this.top < block.bottom);
     }
 
     // Corner touching block
 
-    isTopLeftTouching(blocks: Entity[]) {
+    isTopLeftTouching(blocks: Entity[]): boolean {
+        if (this.hasSubentities()) {
+            return this.subentities.some((entity) => entity.isTopLeftTouching(blocks));
+        }
         return blocks.some((block) => this.top === block.bottom && this.left === block.right);
     }
 
-    isTopRightTouching(blocks: Entity[]) {
+    isTopRightTouching(blocks: Entity[]): boolean {
+        if (this.hasSubentities()) {
+            return this.subentities.some((entity) => entity.isTopRightTouching(blocks));
+        }
         return blocks.some((block) => this.top === block.bottom && this.right === block.left);
     }
 
-    isBottomLeftTouching(blocks: Entity[]) {
+    isBottomLeftTouching(blocks: Entity[]): boolean {
+        if (this.hasSubentities()) {
+            return this.subentities.some((entity) => entity.isBottomLeftTouching(blocks));
+        }
         return blocks.some((block) => this.bottom === block.top && this.left === block.right);
     }
 
-    isBottomRightTouching(blocks: Entity[]) {
+    isBottomRightTouching(blocks: Entity[]): boolean {
+        if (this.hasSubentities()) {
+            return this.subentities.some((entity) => entity.isBottomRightTouching(blocks));
+        }
         return blocks.some((block) => this.bottom === block.top && this.right === block.left);
     }
 }
