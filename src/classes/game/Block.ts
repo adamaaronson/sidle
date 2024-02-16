@@ -1,6 +1,6 @@
 import Entity from './Entity';
 import type { EntitySettings } from './Entity';
-import Point from './Point';
+import Point from '../struct/Point';
 
 export default class Block extends Entity {
     constructor(settings: EntitySettings) {

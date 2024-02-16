@@ -3,7 +3,7 @@ import Symbol from '../config/Symbol';
 import Block from './Block';
 import Entity from './Entity';
 import Player from './Player';
-import Point from './Point';
+import Point from '../struct/Point';
 import Subentity from './Subentity';
 
 export type LevelSettings = {
@@ -69,9 +69,12 @@ export default class Level {
         const width = grid[0].length * squareSize;
         const height = grid.length * squareSize;
 
-        let player = new Player({ position: Point.zero() });
+        let player = new Player();
         let blocks: Block[] = [];
         let background: Block[] = [];
+
+        let playerTopLeft;
+        let playerBottomRight;
 
         // add entities from template
         for (let row = 0; row < grid.length; row++) {
@@ -83,7 +86,16 @@ export default class Level {
                         blocks.push(Level.createBlock(squareSize, position));
                         break;
                     case Symbol.Player:
-                        player.subentities.push(Level.createPlayerSubentity(player, squareSize, position.clone()));
+                        const subentity = Level.createPlayerSubentity(player, squareSize, position.clone());
+                        if (!playerTopLeft) {
+                            playerTopLeft = position;
+                            player.position = playerTopLeft;
+                            player.unroundedPosition = playerTopLeft.clone();
+                        }
+                        playerBottomRight = position.plus(new Point(squareSize, squareSize));
+                        subentity.position.subtract(playerTopLeft);
+                        player.subentities.push(subentity);
+
                         background.push(Level.createBackgroundBlock(squareSize, position.clone()));
                         break;
                     default:
@@ -92,8 +104,13 @@ export default class Level {
             }
         }
 
-        // add walls if specified
+        if (!playerTopLeft || !playerBottomRight) {
+            throw new Error('No player found.');
+        }
 
+        player.size = playerBottomRight.minus(playerTopLeft);
+
+        // add walls if specified
         if (settings?.topWall) {
             blocks.push(
                 new Block({
@@ -211,7 +228,7 @@ export default class Level {
         if (entity === this.player) {
             return this.getPlayerDisplayPosition();
         } else {
-            return this.getPlayerDisplayPosition().minus(this.player.position).plus(entity.position);
+            return this.getPlayerDisplayPosition().minus(this.player.position).plus(new Point(entity.left, entity.top));
         }
     }
 

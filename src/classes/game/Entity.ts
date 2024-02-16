@@ -1,6 +1,6 @@
 import { BACKGROUND_COLOR, GRAVITY, SQUARE_SIZE } from '../config/Defaults';
-import BoolPoint from './BoolPoint';
-import Point from './Point';
+import BoolPoint from '../struct/BoolPoint';
+import Point from '../struct/Point';
 import Subentity from './Subentity';
 
 export interface EntitySettings {
@@ -231,7 +231,6 @@ class Entity {
     }
 
     // Edge touching block
-    // TODO: add subentity functionality for these functions
     isTopTouching(blocks: Entity[]): boolean {
         if (this.hasSubentities()) {
             return this.subentities.some((entity) => entity.isTopTouching(blocks));

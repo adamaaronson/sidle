@@ -9,19 +9,19 @@ class Subentity extends Entity {
     }
 
     get left() {
-        return this.anchor.left + (this as Entity).left;
+        return this.anchor.left + Math.round(this.position.x);
     }
 
     get right() {
-        return this.anchor.left + (this as Entity).right;
+        return this.anchor.left + Math.round(this.position.x + this.size.x);
     }
 
     get top() {
-        return this.anchor.top + (this as Entity).top;
+        return this.anchor.top + Math.round(this.position.y);
     }
 
     get bottom() {
-        return this.anchor.top + (this as Entity).bottom;
+        return this.anchor.top + Math.round(this.position.y + this.size.y);
     }
 }
 

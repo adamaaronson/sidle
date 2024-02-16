@@ -7,6 +7,8 @@ type Props = {
 
 export default function Debug({ level }: Props) {
     const debugData = {
+        'player width': level.player.width,
+        'player height': level.player.height,
         'position x': level.player.position.x,
         'position y': level.player.position.y,
         'unrounded x': level.player.unroundedPosition.x,
@@ -17,8 +19,6 @@ export default function Debug({ level }: Props) {
         'acceleration y': level.player.acceleration.y,
         'subentity xs': level.player.subentities.map((subentity) => subentity.position.x).join(', '),
         'subentity ys': level.player.subentities.map((subentity) => subentity.position.y).join(', '),
-        'subentity unrounded xs': level.player.subentities.map((subentity) => subentity.unroundedPosition.x).join(', '),
-        'subentity unrounded ys': level.player.subentities.map((subentity) => subentity.unroundedPosition.y).join(', '),
     };
 
     const debugConditions = {

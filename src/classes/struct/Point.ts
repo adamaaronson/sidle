@@ -28,6 +28,11 @@ export default class Point {
         this.y += other.y;
     }
 
+    subtract(other: Point) {
+        this.x -= other.x;
+        this.y -= other.y;
+    }
+
     multiply(factor: number) {
         this.x *= factor;
         this.y *= factor;
