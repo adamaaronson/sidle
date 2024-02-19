@@ -5,6 +5,7 @@ import Debug from './Debug';
 import levels from '../data/levels.json';
 import { PLAYER_SQUARE, WINDOW_SQUARES } from '../classes/config/Defaults';
 
+const DEBUG = true;
 let animating = false;
 
 function getLevel(index: number, playerIsMovingRight: boolean, playerIsJumping: boolean) {
@@ -84,7 +85,7 @@ export default function Game() {
 
     return (
         <div>
-            <Debug level={level} />
+            {DEBUG && <Debug level={level} />}
             <div className="level-card">
                 <div className="level-caption">
                     Sidle {levelIndex + 1}/{levels.length}

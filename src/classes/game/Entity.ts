@@ -102,6 +102,10 @@ class Entity {
         const ddAcceleration = this.acceleration.times(secondsElapsed ** 2).times(0.5);
         const vector = dVelocity.plus(ddAcceleration);
         this.interpolatePosition(vector, blocks);
+
+        if (!this.unroundedPosition.rounded().equals(this.position)) {
+            this.position = this.unroundedPosition.rounded();
+        }
     }
 
     updateVelocity(secondsElapsed: number, blocks: Entity[]) {
@@ -124,10 +128,6 @@ class Entity {
         const roundedVector = roundedFinalPosition.minus(this.position);
 
         const size = roundedVector.isWide() ? roundedVector.width : roundedVector.height;
-        // if (size === 0) {
-        //     this.unroundedPosition = unroundedFinalPosition;
-        //     return; // no motion to interpolate TODO: this might be wrong, moves down when grounded
-        // }
         const step = roundedVector.dividedBy(size);
 
         let hasAnyCollisions = BoolPoint.false();
@@ -148,12 +148,14 @@ class Entity {
             this.unroundedPosition.add(currentStep);
 
             const nextPosition = this.unroundedPosition.rounded();
+
             const dPosition = nextPosition.minus(this.position);
             if (!dPosition.isZero()) {
                 this.previousStep = dPosition;
             }
 
             this.position = nextPosition;
+
             hasCollision = this.checkForCollisions(blocks, vector);
             hasAnyCollisions = hasAnyCollisions.or(hasCollision);
         }
