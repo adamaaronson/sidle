@@ -88,6 +88,10 @@ class Entity {
         return this.position.plus(relativePosition);
     }
 
+    resetUpdateTimer() {
+        this.lastUpdated = performance.now();
+    }
+
     update(timestamp: number, blocks: Entity[]) {
         const secondsElapsed = (timestamp - this.lastUpdated) / 1000;
 

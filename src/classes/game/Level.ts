@@ -12,6 +12,7 @@ export type LevelSettings = {
     topWall?: boolean;
     bottomWall?: boolean;
 
+    playerIsMovingLeft?: boolean;
     playerIsMovingRight?: boolean;
     playerIsJumping?: boolean;
 
@@ -55,6 +56,10 @@ export default class Level {
 
         if (settings?.playerIsJumping) {
             player.isJumping = true;
+        }
+
+        if (settings?.playerIsMovingLeft) {
+            player.isMovingLeft = true;
         }
 
         if (settings?.playerIsMovingRight) {
@@ -188,6 +193,10 @@ export default class Level {
         if (this.isVisible(this.player)) {
             this.player.update(timestamp, this.getVisibleBlocks());
         }
+    }
+
+    shouldUpdate() {
+        return this.player.isMoving || !this.player.isBottomTouching(this.blocks);
     }
 
     isComplete() {

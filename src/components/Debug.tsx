@@ -7,6 +7,7 @@ type Props = {
 
 export default function Debug({ level }: Props) {
     const debugData = {
+        'player timestamp': level.player.lastUpdated,
         'player width': level.player.width,
         'player height': level.player.height,
         'position x': level.player.position.x,

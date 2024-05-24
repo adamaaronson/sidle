@@ -33,6 +33,10 @@ export default class Player extends Entity {
         super.update(timestamp, blocks);
     }
 
+    get isMoving() {
+        return this.isMovingLeft || this.isMovingRight || this.isJumping;
+    }
+
     startMovingLeft() {
         this.velocity.x = -this.walkingSpeed;
         this.isMovingLeft = true;
