@@ -124,8 +124,9 @@ export default function Game() {
                 </div>
                 {isEndgame && (
                     <>
-                        <div className="level-caption">That's all I got for now. Share this game with a friend!</div>
-                        <div className="level-caption">– Adam</div>
+                        <div className="level-caption">
+                            That's all I got for now. Share this game with a friend! –Adam
+                        </div>
                     </>
                 )}
                 <svg className="level-card-tail" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
