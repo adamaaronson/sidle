@@ -1,4 +1,4 @@
-import Level from '../classes/game/Level';
+import { Level } from '../classes/game/Level';
 import '../styles/Debug.scss';
 
 type Props = {

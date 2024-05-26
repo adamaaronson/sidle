@@ -1,4 +1,4 @@
-import { BACKGROUND_COLOR, GRAVITY, SQUARE_SIZE } from '../config/Defaults';
+import { GRAVITY, SQUARE_SIZE } from '../config/Defaults';
 import BoolPoint from '../struct/BoolPoint';
 import Point from '../struct/Point';
 import Subentity from './Subentity';
@@ -18,7 +18,6 @@ class Entity {
     position: Point;
     velocity: Point;
     acceleration: Point;
-    color: string;
     text: string;
     subentities: Subentity[];
 
@@ -31,7 +30,6 @@ class Entity {
         this.position = settings?.position ?? Point.zero();
         this.velocity = settings?.velocity ?? Point.zero();
         this.acceleration = settings?.acceleration ?? new Point(0, GRAVITY);
-        this.color = settings?.color ?? BACKGROUND_COLOR;
         this.text = settings?.text ?? '';
         this.subentities = settings?.subentities ?? [];
 
@@ -70,7 +68,6 @@ class Entity {
             left: this.left,
             width: this.width,
             height: this.height,
-            backgroundColor: this.color,
         };
     }
 

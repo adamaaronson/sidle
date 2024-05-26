@@ -28,6 +28,11 @@
     overflow: hidden;
 }
 
+.level-caption {
+    min-width: 100%;
+    max-width: 0;
+}
+
 .entity {
     position: absolute;
     display: flex;

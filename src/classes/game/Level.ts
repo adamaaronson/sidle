@@ -1,4 +1,4 @@
-import { SQUARE_SIZE, WALL_SIZE } from '../config/Defaults';
+import { SQUARE_SIZE, WALL_SIZE, WINDOW_SQUARES } from '../config/Defaults';
 import Symbol from '../config/Symbol';
 import Block from './Block';
 import Entity from './Entity';
@@ -19,9 +19,17 @@ export type LevelSettings = {
     squareSize?: number;
     windowSquares?: Point;
     defaultPlayerSquare?: Point;
+
+    disabled?: boolean;
 };
 
-export default class Level {
+export type LevelData = {
+    windowHeight: number;
+    level: string[];
+    disabled?: boolean;
+};
+
+export class Level {
     player: Player;
     blocks: Block[];
     background: Block[];
@@ -32,9 +40,12 @@ export default class Level {
     bottom: number;
 
     squareSize: number;
+    windowSquares: Point;
     windowSize: Point;
     defaultPlayerPosition: Point;
     playerDisplayPositionCache: Map<Point, Point>;
+
+    disabled: boolean;
 
     constructor(player: Player, blocks: Block[], background: Block[], settings?: LevelSettings) {
         this.player = player;
@@ -47,12 +58,15 @@ export default class Level {
         this.bottom = Math.max(...blocks.map((block) => block.bottom)) - (settings?.bottomWall ? WALL_SIZE : 0);
 
         this.squareSize = settings?.squareSize ?? SQUARE_SIZE;
+        this.windowSquares = settings?.windowSquares ?? WINDOW_SQUARES;
         this.windowSize = settings?.windowSquares?.times(this.squareSize) ?? new Point(this.width, this.height);
         this.defaultPlayerPosition =
             settings?.defaultPlayerSquare
                 ?.times(this.squareSize) // top left square of default player position
                 .minus(this.player.size.times(0.5)) // offset by half of the player size
                 .plus(new Point(this.squareSize, this.squareSize).times(0.5)) ?? this.playerCenter; // offset by half of the square size
+
+        this.disabled = settings?.disabled ?? false;
 
         if (settings?.playerIsJumping) {
             player.isJumping = true;
@@ -69,8 +83,8 @@ export default class Level {
         this.playerDisplayPositionCache = new Map();
     }
 
-    static fromTemplate(grid: string[], settings?: LevelSettings) {
-        const squareSize = settings?.squareSize ?? SQUARE_SIZE;
+    static fromTemplate(grid: string[], settings: LevelSettings) {
+        const squareSize = settings.squareSize ?? SQUARE_SIZE;
         const width = grid[0].length * squareSize;
         const height = grid.length * squareSize;
 
@@ -107,17 +121,21 @@ export default class Level {
             }
         }
 
-        // process player and player subentity positions
-        player.position = playerTopLeft;
-        player.unroundedPosition = player.position.clone();
-        player.size = playerBottomRight.minus(playerTopLeft);
+        if (player.subentities.length === 0) {
+            settings.disabled = true;
+        } else {
+            // process player and player subentity positions
+            player.position = playerTopLeft;
+            player.unroundedPosition = player.position.clone();
+            player.size = playerBottomRight.minus(playerTopLeft);
 
-        for (const subentity of player.subentities) {
-            subentity.position.subtract(playerTopLeft);
+            for (const subentity of player.subentities) {
+                subentity.position.subtract(playerTopLeft);
+            }
         }
 
         // add walls if specified
-        if (settings?.topWall) {
+        if (settings.topWall) {
             blocks.push(
                 new Block({
                     size: new Point(width, WALL_SIZE),
@@ -126,7 +144,7 @@ export default class Level {
             );
         }
 
-        if (settings?.bottomWall) {
+        if (settings.bottomWall) {
             blocks.push(
                 new Block({
                     size: new Point(width, WALL_SIZE),
@@ -135,7 +153,7 @@ export default class Level {
             );
         }
 
-        if (settings?.leftWall) {
+        if (settings.leftWall) {
             blocks.push(
                 new Block({
                     size: new Point(WALL_SIZE, height),
@@ -144,7 +162,7 @@ export default class Level {
             );
         }
 
-        if (settings?.rightWall) {
+        if (settings.rightWall) {
             blocks.push(
                 new Block({
                     size: new Point(WALL_SIZE, height),
@@ -196,7 +214,7 @@ export default class Level {
     }
 
     shouldUpdate() {
-        return this.player.isMoving || !this.player.isBottomTouching(this.blocks);
+        return !this.disabled && (this.player.isMoving || !this.player.isBottomTouching(this.blocks));
     }
 
     isComplete() {

@@ -43,6 +43,10 @@ export default class Point {
         this.y = Math.round(this.y);
     }
 
+    floor() {
+        return new Point(Math.floor(this.x), Math.floor(this.y));
+    }
+
     equals(other: Point) {
         return this.x === other.x && this.y === other.y;
     }

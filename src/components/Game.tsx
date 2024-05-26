@@ -1,23 +1,24 @@
 import { useEffect, useState } from 'react';
 import '../styles/Game.scss';
-import Level from '../classes/game/Level';
+import { Level, LevelData } from '../classes/game/Level';
 import Debug from './Debug';
 import levels from '../data/levels.json';
-import { PLAYER_SQUARE, WINDOW_SQUARES } from '../classes/config/Defaults';
+import { WINDOW_SQUARES } from '../classes/config/Defaults';
 
 const DEBUG = true;
 let animating = false;
 
 function getLevel(index: number, playerIsMovingLeft: boolean, playerIsMovingRight: boolean, playerIsJumping: boolean) {
-    return Level.fromTemplate(levels[index], {
+    const nextLevel: LevelData = levels[index];
+    return Level.fromTemplate(nextLevel.level, {
         topWall: true,
         leftWall: true,
         bottomWall: true,
         playerIsMovingLeft: playerIsMovingLeft,
         playerIsMovingRight: playerIsMovingRight,
         playerIsJumping: playerIsJumping,
-        windowSquares: WINDOW_SQUARES,
-        defaultPlayerSquare: PLAYER_SQUARE,
+        windowSquares: WINDOW_SQUARES.butWithY(nextLevel.windowHeight),
+        defaultPlayerSquare: WINDOW_SQUARES.butWithY(nextLevel.windowHeight).dividedBy(2).floor(),
     });
 }
 
@@ -25,6 +26,7 @@ export default function Game() {
     const [, setTimestamp] = useState(0);
     const [levelIndex, setLevelIndex] = useState(0);
     const [level, setLevel] = useState(() => getLevel(levelIndex, false, false, false));
+    const isEndgame = levelIndex === levels.length - 1;
 
     const gameLoop = (timestamp: number) => {
         level.update(timestamp);
@@ -46,7 +48,7 @@ export default function Game() {
     };
 
     const startAnimatingIfNot = () => {
-        if (!animating) {
+        if (!animating && !level.disabled) {
             requestAnimationFrame(gameLoop);
             level.player.resetUpdateTimer();
             animating = true;
@@ -103,7 +105,13 @@ export default function Game() {
             {DEBUG && <Debug level={level} />}
             <div className="level-card">
                 <div className="level-caption">
-                    Sidle {levelIndex + 1}/{levels.length}
+                    {isEndgame ? (
+                        'Sidle 1/6'
+                    ) : (
+                        <>
+                            Sidle {levelIndex + 1} {level.windowSquares.y}/6
+                        </>
+                    )}
                 </div>
                 <div className="level" style={level.style}>
                     {level.getVisibleEntities().map((entity, index) => (
@@ -114,6 +122,12 @@ export default function Game() {
                         </div>
                     ))}
                 </div>
+                {isEndgame && (
+                    <>
+                        <div className="level-caption">That's all I got for now. Share this game with a friend!</div>
+                        <div className="level-caption">– Adam</div>
+                    </>
+                )}
                 <svg className="level-card-tail" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
                     <g id="Layer_2" data-name="Layer 2">
                         <g id="Layer_1-2" data-name="Layer 1">
