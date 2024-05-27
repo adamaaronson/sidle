@@ -62,14 +62,18 @@ export default function Game() {
     function handleKeydown(event: KeyboardEvent) {
         switch (event.key) {
             case 'ArrowLeft':
+            case 'a':
                 level.player.startMovingLeft();
                 startAnimatingIfNot();
                 break;
             case 'ArrowRight':
+            case 'd':
                 level.player.startMovingRight();
                 startAnimatingIfNot();
                 break;
             case 'ArrowUp':
+            case 'w':
+            case ' ':
                 level.player.startJumping(level.getVisibleBlocks());
                 startAnimatingIfNot();
                 break;
@@ -79,12 +83,16 @@ export default function Game() {
     function handleKeyup(event: KeyboardEvent) {
         switch (event.key) {
             case 'ArrowLeft':
+            case 'a':
                 level.player.stopMovingLeft();
                 break;
             case 'ArrowRight':
+            case 'd':
                 level.player.stopMovingRight();
                 break;
             case 'ArrowUp':
+            case 'w':
+            case ' ':
                 level.player.stopJumping(level.getVisibleBlocks());
                 break;
         }
