@@ -5,7 +5,7 @@ import Debug from './Debug';
 import levels from '../data/levels.json';
 import { WINDOW_SQUARES } from '../classes/config/Defaults';
 
-const DEBUG = true;
+const DEBUG = false;
 let animating = false;
 
 function getLevel(index: number, playerIsMovingLeft: boolean, playerIsMovingRight: boolean, playerIsJumping: boolean) {
