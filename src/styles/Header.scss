@@ -6,8 +6,8 @@
     text-align: right;
     align-self: flex-start;
     display: flex;
-    padding: 0.5rem;
-    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    gap: 0.6rem;
     justify-content: flex-end;
 
     button {
@@ -15,7 +15,7 @@
         border: none;
         color: $white-color;
         background: none;
-        font-size: 1.5rem;
+        font-size: 1.8rem;
         display: inline-block;
         cursor: pointer;
     }
