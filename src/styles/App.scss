@@ -13,6 +13,7 @@ body {
 
 .app {
     display: flex;
-    align-items: center;
+    flex-flow: row wrap;
+    align-items: space-around;
     justify-content: center;
 }
