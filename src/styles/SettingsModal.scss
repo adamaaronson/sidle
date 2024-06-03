@@ -1,0 +1,12 @@
+@import '../main.scss';
+
+.settings-row {
+    width: 100%;
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid $gray-color;
+    margin-top: 1rem;
+}
