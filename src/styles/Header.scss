@@ -1,7 +1,7 @@
 @import '../main.scss';
 
 .header {
-    border-bottom: 1px solid rgb(58, 58, 60);
+    border-bottom: 1px solid $gray-color;
     width: 100%;
     text-align: right;
     align-self: flex-start;

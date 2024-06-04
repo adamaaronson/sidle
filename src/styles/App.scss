@@ -9,7 +9,6 @@ body,
 
 body {
     background-color: $background-color;
-    font-family: sans-serif;
 }
 
 .app {
@@ -17,4 +16,8 @@ body {
     flex-flow: row wrap;
     align-items: space-around;
     justify-content: center;
+
+    &.modal-open {
+        overflow-y: hidden;
+    }
 }

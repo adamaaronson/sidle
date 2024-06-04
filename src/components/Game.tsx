@@ -8,6 +8,11 @@ import { WINDOW_SQUARES } from '../classes/config/Defaults';
 const DEBUG = false;
 let animating = false;
 
+interface Props {
+    levelIndex: number;
+    onChangeLevel: (newLevelIndex: number) => void;
+}
+
 function getLevel(index: number, playerIsMovingLeft: boolean, playerIsMovingRight: boolean, playerIsJumping: boolean) {
     const nextLevel: LevelData = levels[index];
     return Level.fromTemplate(nextLevel.level, {
@@ -22,9 +27,8 @@ function getLevel(index: number, playerIsMovingLeft: boolean, playerIsMovingRigh
     });
 }
 
-export default function Game() {
+export default function Game({ levelIndex, onChangeLevel }: Props) {
     const [, setTimestamp] = useState(0);
-    const [levelIndex, setLevelIndex] = useState(0);
     const [level, setLevel] = useState(() => getLevel(levelIndex, false, false, false));
     const isEndgame = levelIndex === levels.length - 1;
 
@@ -34,10 +38,7 @@ export default function Game() {
 
         if (level.isComplete()) {
             animating = false;
-            setLevel(
-                getLevel(levelIndex + 1, level.player.isMovingLeft, level.player.isMovingRight, level.player.isJumping),
-            );
-            setLevelIndex(levelIndex + 1);
+            onChangeLevel(levelIndex + 1);
         } else {
             if (level.shouldUpdate()) {
                 requestAnimationFrame(gameLoop);
@@ -54,6 +55,10 @@ export default function Game() {
             animating = true;
         }
     };
+
+    useEffect(() => {
+        setLevel(getLevel(levelIndex, level.player.isMovingLeft, level.player.isMovingRight, level.player.isJumping));
+    }, [levelIndex]);
 
     useEffect(() => {
         startAnimatingIfNot();

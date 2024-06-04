@@ -1,5 +1,5 @@
 $background-color: #1e1e1e;
-$gray-color: #474747;
+$gray-color: rgb(58, 58, 60);
 $message-color: #3c83f7;
 $white-color: #f4f0f0;
 
@@ -7,4 +7,5 @@ $white-color: #f4f0f0;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: sans-serif;
 }
