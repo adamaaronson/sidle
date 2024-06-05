@@ -10,6 +10,8 @@ export interface EntitySettings {
     acceleration?: Point;
     color?: string;
     text?: string;
+    lightText?: string;
+    highContrastText?: string;
     subentities?: Subentity[];
 }
 
@@ -19,6 +21,8 @@ class Entity {
     velocity: Point;
     acceleration: Point;
     text: string;
+    lightText: string | null;
+    highContrastText: string | null;
     subentities: Subentity[];
 
     lastUpdated: number;
@@ -31,6 +35,8 @@ class Entity {
         this.velocity = settings?.velocity ?? Point.zero();
         this.acceleration = settings?.acceleration ?? new Point(0, GRAVITY);
         this.text = settings?.text ?? '';
+        this.lightText = settings?.lightText ?? null;
+        this.highContrastText = settings?.highContrastText ?? null;
         this.subentities = settings?.subentities ?? [];
 
         this.lastUpdated = performance.now();
@@ -75,6 +81,16 @@ class Entity {
         return {
             fontSize: `${this.width * 0.94}px`,
         };
+    }
+
+    getText(darkMode: boolean, highContrastMode: boolean) {
+        if (!darkMode && this.lightText) {
+            return this.lightText;
+        }
+        if (highContrastMode && this.highContrastText) {
+            return this.highContrastText;
+        }
+        return this.text;
     }
 
     hasSubentities() {

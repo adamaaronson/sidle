@@ -11,6 +11,8 @@ let animating = false;
 interface Props {
     levelIndex: number;
     onChangeLevel: (newLevelIndex: number) => void;
+    darkMode: boolean;
+    highContrastMode: boolean;
 }
 
 function getLevel(index: number, playerIsMovingLeft: boolean, playerIsMovingRight: boolean, playerIsJumping: boolean) {
@@ -27,7 +29,7 @@ function getLevel(index: number, playerIsMovingLeft: boolean, playerIsMovingRigh
     });
 }
 
-export default function Game({ levelIndex, onChangeLevel }: Props) {
+export default function Game({ levelIndex, onChangeLevel, darkMode, highContrastMode }: Props) {
     const [, setTimestamp] = useState(0);
     const [level, setLevel] = useState(() => getLevel(levelIndex, false, false, false));
     const isEndgame = levelIndex === levels.length - 1;
@@ -58,6 +60,7 @@ export default function Game({ levelIndex, onChangeLevel }: Props) {
 
     useEffect(() => {
         setLevel(getLevel(levelIndex, level.player.isMovingLeft, level.player.isMovingRight, level.player.isJumping));
+        localStorage.setItem('levelIndex', levelIndex.toString());
     }, [levelIndex]);
 
     useEffect(() => {
@@ -130,7 +133,7 @@ export default function Game({ levelIndex, onChangeLevel }: Props) {
                     {level.getVisibleEntities().map((entity, index) => (
                         <div className="entity" key={index} style={level.getEntityStyle(entity)}>
                             <div className="entity-text" style={entity.textStyle}>
-                                {entity.text}
+                                {entity.getText(darkMode, highContrastMode)}
                             </div>
                         </div>
                     ))}

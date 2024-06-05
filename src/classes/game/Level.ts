@@ -5,6 +5,7 @@ import Entity from './Entity';
 import Player from './Player';
 import Point from '../struct/Point';
 import Subentity from './Subentity';
+import Emoji from '../config/Emoji';
 
 export type LevelSettings = {
     leftWall?: boolean;
@@ -291,7 +292,8 @@ export class Level {
         return new Subentity(player, {
             size: new Point(squareSize, squareSize),
             position: position,
-            text: '🟨',
+            text: Emoji.Player,
+            highContrastText: Emoji.PlayerHighContrast,
         });
     }
 
@@ -299,7 +301,8 @@ export class Level {
         return new Block({
             size: new Point(squareSize, squareSize),
             position: position,
-            text: '🟩',
+            text: Emoji.Block,
+            highContrastText: Emoji.BlockHighContrast,
         });
     }
 
@@ -307,7 +310,8 @@ export class Level {
         return new Block({
             size: new Point(squareSize, squareSize),
             position: position,
-            text: '⬛️',
+            text: Emoji.BackgroundDark,
+            lightText: Emoji.BackgroundLight,
         });
     }
 }

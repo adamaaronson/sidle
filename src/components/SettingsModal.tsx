@@ -32,7 +32,7 @@ export default function SettingsModal({
         <div className="settings-list">
             <div className="settings-row">
                 <label className="settings-label" htmlFor="dark-mode-checkbox">
-                    Dark mode
+                    Emoji dark mode
                 </label>
                 <input
                     id="dark-mode-checkbox"

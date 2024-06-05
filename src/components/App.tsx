@@ -11,9 +11,11 @@ function App() {
     const [darkMode, setDarkMode] = useState(true);
     const [highContrastMode, setHighContrastMode] = useState(false);
     const [controlButtons, setControlButtons] = useState(false);
-    const [levelIndex, setLevelIndex] = useState(0);
+    const [levelIndex, setLevelIndex] = useState(parseInt(localStorage.getItem('levelIndex') || '0'));
 
     const modalOpen = aboutModal || settingsModal;
+
+    console.log(darkMode, highContrastMode);
 
     return (
         <div className={'app' + (modalOpen ? ' modal-open' : '')}>
@@ -39,7 +41,12 @@ function App() {
                     />
                 </Modal>
             )}
-            <Game levelIndex={levelIndex} onChangeLevel={(newLevelIndex: number) => setLevelIndex(newLevelIndex)} />
+            <Game
+                levelIndex={levelIndex}
+                onChangeLevel={(newLevelIndex: number) => setLevelIndex(newLevelIndex)}
+                darkMode={darkMode}
+                highContrastMode={highContrastMode}
+            />
         </div>
     );
 }
