@@ -13,6 +13,7 @@ interface Props {
     onChangeLevel: (newLevelIndex: number) => void;
     darkMode: boolean;
     highContrastMode: boolean;
+    iMessageMode: boolean;
 }
 
 function getLevel(index: number, playerIsMovingLeft: boolean, playerIsMovingRight: boolean, playerIsJumping: boolean) {
@@ -29,7 +30,7 @@ function getLevel(index: number, playerIsMovingLeft: boolean, playerIsMovingRigh
     });
 }
 
-export default function Game({ levelIndex, onChangeLevel, darkMode, highContrastMode }: Props) {
+export default function Game({ levelIndex, onChangeLevel, darkMode, highContrastMode, iMessageMode }: Props) {
     const [, setTimestamp] = useState(0);
     const [level, setLevel] = useState(() => getLevel(levelIndex, false, false, false));
     const isEndgame = levelIndex === levels.length - 1;
@@ -119,7 +120,7 @@ export default function Game({ levelIndex, onChangeLevel, darkMode, highContrast
     return (
         <div>
             {DEBUG && <Debug level={level} />}
-            <div className="level-card">
+            <div className={'level-card ' + (iMessageMode ? 'imessage' : 'sms')}>
                 <div className="level-caption">
                     {isEndgame ? (
                         'Sidle 1/6'
@@ -145,7 +146,11 @@ export default function Game({ levelIndex, onChangeLevel, darkMode, highContrast
                         </div>
                     </>
                 )}
-                <svg className="level-card-tail" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+                <svg
+                    className={'level-card-tail ' + (iMessageMode ? 'imessage' : 'sms')}
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 18 18"
+                >
                     <g id="Layer_2" data-name="Layer 2">
                         <g id="Layer_1-2" data-name="Layer 1">
                             <path d="M18,18H11C6,18,0,12,0,7V0H9V9a9,9,0,0,0,4.5,7.79A17.12,17.12,0,0,0,18,18Z" />

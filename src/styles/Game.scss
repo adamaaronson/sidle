@@ -11,6 +11,10 @@
     flex-direction: column;
     gap: 1em;
     position: relative;
+
+    &.sms {
+        background: $sms-color;
+    }
 }
 
 .level-card-tail {
@@ -20,6 +24,10 @@
     width: 2rem;
     left: 100%;
     transform: translate(-50%, -100%);
+
+    &.sms {
+        fill: $sms-color;
+    }
 }
 
 .level {

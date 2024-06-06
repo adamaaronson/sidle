@@ -5,9 +5,11 @@ import Modal from './Modal';
 interface Props {
     darkMode: boolean;
     highContrastMode: boolean;
+    iMessageMode: boolean;
     controlButtons: boolean;
     toggleDarkMode: () => void;
     toggleHighContrastMode: () => void;
+    toggleIMessageMode: () => void;
     toggleControlButtons: () => void;
     onRestartProgress: () => void;
 }
@@ -15,9 +17,11 @@ interface Props {
 export default function SettingsModal({
     darkMode,
     highContrastMode,
+    iMessageMode,
     controlButtons,
     toggleDarkMode,
     toggleHighContrastMode,
+    toggleIMessageMode,
     toggleControlButtons,
     onRestartProgress,
 }: Props) {
@@ -50,6 +54,17 @@ export default function SettingsModal({
                     type="checkbox"
                     defaultChecked={highContrastMode}
                     onChange={() => toggleHighContrastMode()}
+                />
+            </div>
+            <div className="settings-row">
+                <label className="settings-label" htmlFor="imessage-mode-checkbox">
+                    iMessage mode
+                </label>
+                <input
+                    id="imessage-mode-checkbox"
+                    type="checkbox"
+                    defaultChecked={iMessageMode}
+                    onChange={() => toggleIMessageMode()}
                 />
             </div>
             <div className="settings-row">
