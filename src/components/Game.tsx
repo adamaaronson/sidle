@@ -4,9 +4,11 @@ import { Level, LevelData } from '../classes/game/Level';
 import Debug from './Debug';
 import levels from '../data/levels.json';
 import { WINDOW_SQUARES } from '../classes/config/Defaults';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const DEBUG = false;
 let animating = false;
+let hasMoved = false;
 
 interface Props {
     levelIndex: number;
@@ -34,6 +36,10 @@ export default function Game({ levelIndex, onChangeLevel, darkMode, highContrast
     const [, setTimestamp] = useState(0);
     const [level, setLevel] = useState(() => getLevel(levelIndex, false, false, false));
     const isEndgame = levelIndex === levels.length - 1;
+
+    if (!hasMoved && level.player.isMoving) {
+        hasMoved = true;
+    }
 
     const gameLoop = (timestamp: number) => {
         level.update(timestamp);
@@ -121,6 +127,13 @@ export default function Game({ levelIndex, onChangeLevel, darkMode, highContrast
         <div>
             {DEBUG && <Debug level={level} />}
             <div className={'level-card ' + (iMessageMode ? 'imessage' : 'sms')}>
+                <AnimatePresence>
+                    {!hasMoved && (
+                        <motion.div initial={{ opacity: 0.8 }} exit={{ opacity: 0 }} className="use-the-arrow-keys">
+                            Use the arrow keys!
+                        </motion.div>
+                    )}
+                </AnimatePresence>
                 <div className="level-caption">
                     {isEndgame ? (
                         'Sidle 1/6'

@@ -52,3 +52,14 @@
     margin: 0;
     padding: 0;
 }
+
+.use-the-arrow-keys {
+    position: absolute;
+    color: $white-color;
+    top: 100%;
+    left: 0;
+    font-size: 0.875rem;
+    opacity: 65%;
+    font-style: italic;
+    padding: 0.5rem 1rem;
+}
