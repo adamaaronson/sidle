@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import '../styles/App.scss';
-import Game from './Game';
+import Game, { getLevel } from './Game';
 import Header from './Header';
 import Modal from './Modal';
 import SettingsModal from './SettingsModal';
+import { Level } from '../classes/game/Level';
 
 function getLocalStorageBoolean(key: string, defaultValue: boolean) {
     const localStorageValue = localStorage.getItem(key);
@@ -19,6 +20,7 @@ function App() {
     const [iMessageMode, setIMessageMode] = useState(getLocalStorageBoolean('iMessageMode', true));
     const [controlButtons, setControlButtons] = useState(getLocalStorageBoolean('controlButtons', false));
     const [levelIndex, setLevelIndex] = useState(parseInt(localStorage.getItem('levelIndex') || '0'));
+    const [level, setLevel] = useState(() => getLevel(levelIndex, false, false, false));
 
     const modalOpen = aboutModal || settingsModal;
 
@@ -38,9 +40,15 @@ function App() {
         localStorage.setItem('controlButtons', controlButtons.toString());
     }, [controlButtons]);
 
+    const openShareSheet = () => {};
+
     return (
         <div className={'app' + (modalOpen ? ' modal-open' : '')}>
-            <Header onOpenAbout={() => setAboutModal(true)} onOpenSettings={() => setSettingsModal(true)} />
+            <Header
+                onOpenAbout={() => setAboutModal(true)}
+                onShare={() => openShareSheet()}
+                onOpenSettings={() => setSettingsModal(true)}
+            />
             {aboutModal && (
                 <Modal title="About" onClose={() => setAboutModal(false)}>
                     <></>
@@ -66,7 +74,9 @@ function App() {
             )}
             <Game
                 levelIndex={levelIndex}
-                onChangeLevel={(newLevelIndex: number) => setLevelIndex(newLevelIndex)}
+                setLevelIndex={(newLevelIndex: number) => setLevelIndex(newLevelIndex)}
+                level={level}
+                setLevel={setLevel}
                 darkMode={darkMode}
                 highContrastMode={highContrastMode}
                 iMessageMode={iMessageMode}

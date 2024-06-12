@@ -9,6 +9,7 @@
     padding: 0.6rem 1rem;
     gap: 0.6rem;
     justify-content: flex-end;
+    align-items: center;
 
     button {
         appearance: none;
@@ -18,5 +19,36 @@
         font-size: 1.8rem;
         display: inline-block;
         cursor: pointer;
+    }
+
+    .fancy-button {
+        border: 2px solid $white-color;
+        border-radius: 999px;
+        font-size: 1rem;
+        padding: 0em 0.8em;
+        height: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5em;
+
+        &:hover {
+            color: $background-color;
+            background-color: $white-color;
+        }
+    }
+
+    .share-icon {
+        font-size: 1.1rem;
+    }
+
+    .round-button {
+        font-size: 1.2rem;
+        width: 2rem;
+        padding: 0;
+    }
+
+    .settings-button {
+        line-height: 1rem;
     }
 }

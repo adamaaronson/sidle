@@ -12,13 +12,20 @@ let hasMoved = false;
 
 interface Props {
     levelIndex: number;
-    onChangeLevel: (newLevelIndex: number) => void;
+    setLevelIndex: (newLevelIndex: number) => void;
+    level: Level;
+    setLevel: (newLevel: Level) => void;
     darkMode: boolean;
     highContrastMode: boolean;
     iMessageMode: boolean;
 }
 
-function getLevel(index: number, playerIsMovingLeft: boolean, playerIsMovingRight: boolean, playerIsJumping: boolean) {
+export function getLevel(
+    index: number,
+    playerIsMovingLeft: boolean,
+    playerIsMovingRight: boolean,
+    playerIsJumping: boolean,
+) {
     const nextLevel: LevelData = levels[index];
     return Level.fromTemplate(nextLevel.level, {
         topWall: true,
@@ -32,9 +39,16 @@ function getLevel(index: number, playerIsMovingLeft: boolean, playerIsMovingRigh
     });
 }
 
-export default function Game({ levelIndex, onChangeLevel, darkMode, highContrastMode, iMessageMode }: Props) {
+export default function Game({
+    levelIndex,
+    setLevelIndex,
+    level,
+    setLevel,
+    darkMode,
+    highContrastMode,
+    iMessageMode,
+}: Props) {
     const [, setTimestamp] = useState(0);
-    const [level, setLevel] = useState(() => getLevel(levelIndex, false, false, false));
     const isEndgame = levelIndex === levels.length - 1;
 
     if (!hasMoved && level.player.isMoving) {
@@ -47,7 +61,7 @@ export default function Game({ levelIndex, onChangeLevel, darkMode, highContrast
 
         if (level.isComplete()) {
             animating = false;
-            onChangeLevel(levelIndex + 1);
+            setLevelIndex(levelIndex + 1);
         } else {
             if (level.shouldUpdate()) {
                 requestAnimationFrame(gameLoop);
