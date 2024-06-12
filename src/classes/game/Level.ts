@@ -270,6 +270,37 @@ export class Level {
         return style;
     }
 
+    getCaption(isEndgame: boolean, levelIndex: number) {
+        return isEndgame ? 'Sidle 1/6' : `Sidle ${levelIndex + 1} ${this.windowSquares.y}/6`;
+    }
+
+    getShareText(isEndgame: boolean, levelIndex: number, darkMode: boolean, highContrastMode: boolean) {
+        const rows = this.windowSquares.y;
+        const cols = this.windowSquares.x;
+        let emojiGrid = Array.from(Array(rows), (_) => Array(cols).fill(''));
+        for (const entity of [...this.background, ...this.blocks, ...this.player.subentities]) {
+            if (this.isVisible(entity)) {
+                const text = entity.getText(darkMode, highContrastMode);
+                if (!text) {
+                    continue;
+                }
+                const entityDisplayPosition = this.getEntityDisplayPosition(entity);
+                const emojiRow = Math.round(entityDisplayPosition.y / this.squareSize);
+                const emojiCol = Math.round(entityDisplayPosition.x / this.squareSize);
+                if (emojiRow >= 0 && emojiRow < rows && emojiCol >= 0 && emojiCol < cols) {
+                    emojiGrid[emojiRow][emojiCol] = entity.getText(darkMode, highContrastMode);
+                }
+            }
+        }
+
+        const emojiGridText = emojiGrid.map((row) => row.join('')).join('\n');
+        const shareText = `${this.getCaption(
+            isEndgame,
+            levelIndex,
+        )}\n\n${emojiGridText}\n\nhttps://aaronson.org/sidle/`;
+        return shareText;
+    }
+
     isVisible(entity: Entity) {
         const topLeft = this.getEntityDisplayPosition(entity);
         const bottomRight = topLeft.plus(entity.size);

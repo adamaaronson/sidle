@@ -4,7 +4,9 @@ import Game, { getLevel } from './Game';
 import Header from './Header';
 import Modal from './Modal';
 import SettingsModal from './SettingsModal';
-import { Level } from '../classes/game/Level';
+import levels from '../data/levels.json';
+
+const COPIED_MILLISECONDS = 2 * 1000; // 2 seconds
 
 function getLocalStorageBoolean(key: string, defaultValue: boolean) {
     const localStorageValue = localStorage.getItem(key);
@@ -21,6 +23,7 @@ function App() {
     const [controlButtons, setControlButtons] = useState(getLocalStorageBoolean('controlButtons', false));
     const [levelIndex, setLevelIndex] = useState(parseInt(localStorage.getItem('levelIndex') || '0'));
     const [level, setLevel] = useState(() => getLevel(levelIndex, false, false, false));
+    const [copied, setCopied] = useState(false);
 
     const modalOpen = aboutModal || settingsModal;
 
@@ -40,11 +43,33 @@ function App() {
         localStorage.setItem('controlButtons', controlButtons.toString());
     }, [controlButtons]);
 
-    const openShareSheet = () => {};
+    useEffect(() => {
+        if (copied) {
+            setTimeout(() => {
+                setCopied(false);
+            }, COPIED_MILLISECONDS);
+        }
+    }, [copied]);
+
+    const openShareSheet = () => {
+        const text = level.getShareText(levelIndex === levels.length - 1, levelIndex, darkMode, highContrastMode);
+
+        if ('share' in navigator && navigator.canShare({ text: text })) {
+            // can use Web Share API
+            navigator.share({
+                text: text,
+            });
+        } else {
+            // fallback
+            window.navigator.clipboard.writeText(text);
+            setCopied(true);
+        }
+    };
 
     return (
         <div className={'app' + (modalOpen ? ' modal-open' : '')}>
             <Header
+                copied={copied}
                 onOpenAbout={() => setAboutModal(true)}
                 onShare={() => openShareSheet()}
                 onOpenSettings={() => setSettingsModal(true)}

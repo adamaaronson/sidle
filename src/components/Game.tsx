@@ -148,15 +148,7 @@ export default function Game({
                         </motion.div>
                     )}
                 </AnimatePresence>
-                <div className="level-caption">
-                    {isEndgame ? (
-                        'Sidle 1/6'
-                    ) : (
-                        <>
-                            Sidle {levelIndex + 1} {level.windowSquares.y}/6
-                        </>
-                    )}
-                </div>
+                <div className="level-caption">{level.getCaption(isEndgame, levelIndex)}</div>
                 <div className="level" style={level.style}>
                     {level.getVisibleEntities().map((entity, index) => (
                         <div className="entity" key={index} style={level.getEntityStyle(entity)}>
