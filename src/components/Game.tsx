@@ -128,8 +128,8 @@ export default function Game({ levelIndex, onChangeLevel, darkMode, highContrast
             {DEBUG && <Debug level={level} />}
             <div className={'level-card ' + (iMessageMode ? 'imessage' : 'sms')}>
                 <AnimatePresence>
-                    {!hasMoved && (
-                        <motion.div initial={{ opacity: 0.8 }} exit={{ opacity: 0 }} className="use-the-arrow-keys">
+                    {!hasMoved && !isEndgame && (
+                        <motion.div initial={{ opacity: 0.9 }} exit={{ opacity: 0 }} className="use-the-arrow-keys">
                             Use the arrow keys!
                         </motion.div>
                     )}
