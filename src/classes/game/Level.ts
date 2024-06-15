@@ -69,15 +69,15 @@ export class Level {
 
         this.disabled = settings?.disabled ?? false;
 
-        if (settings?.playerIsJumping) {
+        if (settings?.playerIsJumping && !this.disabled) {
             player.isJumping = true;
         }
 
-        if (settings?.playerIsMovingLeft) {
+        if (settings?.playerIsMovingLeft && !this.disabled) {
             player.isMovingLeft = true;
         }
 
-        if (settings?.playerIsMovingRight) {
+        if (settings?.playerIsMovingRight && !this.disabled) {
             player.isMovingRight = true;
         }
 

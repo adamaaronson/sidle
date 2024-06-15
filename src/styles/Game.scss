@@ -16,6 +16,12 @@
     &.sms {
         background: $sms-color;
     }
+
+    user-select: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .level-card-tail {
@@ -72,11 +78,8 @@
     width: 100%;
     left: 0;
     padding: 1rem;
-    // width: calc(100% + 4rem);
     appearance: none;
     line-height: 0;
-    // margin-top: 3rem;
-    // margin-left: -3rem;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
