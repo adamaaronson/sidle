@@ -141,6 +141,7 @@ export class Level {
                 new Block({
                     size: new Point(width, WALL_SIZE),
                     position: new Point(0, -WALL_SIZE),
+                    isWall: true,
                 }),
             );
         }
@@ -150,6 +151,7 @@ export class Level {
                 new Block({
                     size: new Point(width, WALL_SIZE),
                     position: new Point(0, height),
+                    isWall: true,
                 }),
             );
         }
@@ -159,6 +161,7 @@ export class Level {
                 new Block({
                     size: new Point(WALL_SIZE, height),
                     position: new Point(-WALL_SIZE, 0),
+                    isWall: true,
                 }),
             );
         }
@@ -168,6 +171,7 @@ export class Level {
                 new Block({
                     size: new Point(WALL_SIZE, height),
                     position: new Point(width, 0),
+                    isWall: true,
                 }),
             );
         }
@@ -304,10 +308,11 @@ export class Level {
     isVisible(entity: Entity) {
         const topLeft = this.getEntityDisplayPosition(entity);
         const bottomRight = topLeft.plus(entity.size);
+        if (entity.isWall) {
+            return true;
+        }
 
-        return (
-            bottomRight.x >= 0 && bottomRight.y >= 0 && topLeft.x <= this.windowSize.x && topLeft.y <= this.windowSize.y
-        );
+        return bottomRight.x > 0 && bottomRight.y > 0 && topLeft.x < this.windowSize.x && topLeft.y < this.windowSize.y;
     }
 
     getVisibility(entity: Entity) {

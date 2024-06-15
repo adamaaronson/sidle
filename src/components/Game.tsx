@@ -5,6 +5,8 @@ import Debug from './Debug';
 import levels from '../data/levels.json';
 import { WINDOW_SQUARES } from '../classes/config/Defaults';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft, faArrowRight, faArrowUp } from '@fortawesome/free-solid-svg-icons';
 
 const DEBUG = false;
 let animating = false;
@@ -18,6 +20,7 @@ interface Props {
     darkMode: boolean;
     highContrastMode: boolean;
     iMessageMode: boolean;
+    controlButtons: boolean;
 }
 
 export function getLevel(
@@ -47,6 +50,7 @@ export default function Game({
     darkMode,
     highContrastMode,
     iMessageMode,
+    controlButtons,
 }: Props) {
     const [, setTimestamp] = useState(0);
     const isEndgame = levelIndex === levels.length - 1;
@@ -88,23 +92,47 @@ export default function Game({
         startAnimatingIfNot();
     }, [level]);
 
+    const startMovingLeft = () => {
+        level.player.startMovingLeft();
+        startAnimatingIfNot();
+    };
+
+    const startMovingRight = () => {
+        level.player.startMovingRight();
+        startAnimatingIfNot();
+    };
+
+    const startJumping = () => {
+        level.player.startJumping(level.getVisibleBlocks());
+        startAnimatingIfNot();
+    };
+
+    const stopMovingLeft = () => {
+        level.player.stopMovingLeft();
+    };
+
+    const stopMovingRight = () => {
+        level.player.stopMovingRight();
+    };
+
+    const stopJumping = () => {
+        level.player.stopJumping(level.getVisibleBlocks());
+    };
+
     function handleKeydown(event: KeyboardEvent) {
         switch (event.key) {
             case 'ArrowLeft':
             case 'a':
-                level.player.startMovingLeft();
-                startAnimatingIfNot();
+                startMovingLeft();
                 break;
             case 'ArrowRight':
             case 'd':
-                level.player.startMovingRight();
-                startAnimatingIfNot();
+                startMovingRight();
                 break;
             case 'ArrowUp':
             case 'w':
             case ' ':
-                level.player.startJumping(level.getVisibleBlocks());
-                startAnimatingIfNot();
+                startJumping();
                 break;
         }
     }
@@ -113,16 +141,16 @@ export default function Game({
         switch (event.key) {
             case 'ArrowLeft':
             case 'a':
-                level.player.stopMovingLeft();
+                stopMovingLeft();
                 break;
             case 'ArrowRight':
             case 'd':
-                level.player.stopMovingRight();
+                stopMovingRight();
                 break;
             case 'ArrowUp':
             case 'w':
             case ' ':
-                level.player.stopJumping(level.getVisibleBlocks());
+                stopJumping();
                 break;
         }
     }
@@ -141,15 +169,45 @@ export default function Game({
         <div>
             {DEBUG && <Debug level={level} />}
             <div className={'level-card ' + (iMessageMode ? 'imessage' : 'sms')}>
-                <AnimatePresence>
-                    {!hasMoved && !isEndgame && (
-                        <motion.div initial={{ opacity: 0.9 }} exit={{ opacity: 0 }} className="use-the-arrow-keys">
-                            Use the arrow keys!
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                {controlButtons ? (
+                    <div className="control-buttons">
+                        <div className="side-buttons">
+                            <button
+                                className={`control-button left-button${level.player.isMovingLeft ? ' active' : ''}`}
+                                onTouchStart={startMovingLeft}
+                                onTouchEnd={stopMovingLeft}
+                            >
+                                <FontAwesomeIcon className="control-button-icon" icon={faArrowLeft} />
+                            </button>
+                            <button
+                                className={`control-button right-button${level.player.isMovingRight ? ' active' : ''}`}
+                                onTouchStart={startMovingRight}
+                                onTouchEnd={stopMovingRight}
+                            >
+                                <FontAwesomeIcon className="control-button-icon" icon={faArrowRight} />
+                            </button>
+                        </div>
+                        <div className="jump-button">
+                            <button
+                                className={`control-button up-button${level.player.isJumping ? ' active' : ''}`}
+                                onTouchStart={startJumping}
+                                onTouchEnd={stopJumping}
+                            >
+                                <FontAwesomeIcon className="control-button-icon" icon={faArrowUp} />
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <AnimatePresence>
+                        {!hasMoved && !isEndgame && (
+                            <motion.div initial={{ opacity: 0.9 }} exit={{ opacity: 0 }} className="use-the-arrow-keys">
+                                Use the arrow keys!
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                )}
                 <div className="level-caption">{level.getCaption(isEndgame, levelIndex)}</div>
-                <div className="level" style={level.style}>
+                <div className="level" id="level" style={level.style}>
                     {level.getVisibleEntities().map((entity, index) => (
                         <div className="entity" key={index} style={level.getEntityStyle(entity)}>
                             <div className="entity-text" style={entity.textStyle}>

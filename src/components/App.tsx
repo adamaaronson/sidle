@@ -105,6 +105,7 @@ function App() {
                 darkMode={darkMode}
                 highContrastMode={highContrastMode}
                 iMessageMode={iMessageMode}
+                controlButtons={controlButtons}
             />
         </div>
     );

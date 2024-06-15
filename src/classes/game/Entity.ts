@@ -13,6 +13,7 @@ export interface EntitySettings {
     lightText?: string;
     highContrastText?: string;
     subentities?: Subentity[];
+    isWall?: boolean;
 }
 
 class Entity {
@@ -24,6 +25,7 @@ class Entity {
     lightText: string | null;
     highContrastText: string | null;
     subentities: Subentity[];
+    isWall: boolean;
 
     lastUpdated: number;
     unroundedPosition: Point;
@@ -38,6 +40,7 @@ class Entity {
         this.lightText = settings?.lightText ?? null;
         this.highContrastText = settings?.highContrastText ?? null;
         this.subentities = settings?.subentities ?? [];
+        this.isWall = settings?.isWall ?? false;
 
         this.lastUpdated = performance.now();
         this.unroundedPosition = this.position.clone();

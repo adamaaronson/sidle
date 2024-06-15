@@ -2,6 +2,7 @@
 
 .level-card {
     padding: 1rem;
+    margin: 1rem;
     border-radius: 1rem;
     font-size: 1.25em;
     color: $white-color;
@@ -62,4 +63,52 @@
     opacity: 65%;
     font-style: italic;
     padding: 0.5rem 1rem;
+}
+
+.control-buttons {
+    position: fixed;
+    top: 100%;
+    transform: translateY(-100%);
+    width: 100%;
+    left: 0;
+    padding: 1rem;
+    // width: calc(100% + 4rem);
+    appearance: none;
+    line-height: 0;
+    // margin-top: 3rem;
+    // margin-left: -3rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    user-select: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+
+    .control-button {
+        appearance: none;
+        border: 3px solid $white-color;
+        background: none;
+        color: $white-color;
+        border-radius: 999px;
+        width: 4rem;
+        height: 4rem;
+        font-size: 2rem;
+        cursor: pointer;
+
+        &.active {
+            background: $white-color;
+            color: $background-color;
+        }
+    }
+
+    .up-button {
+        justify-self: flex-end;
+    }
+
+    .side-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
 }
