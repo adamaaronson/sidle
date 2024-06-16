@@ -69,7 +69,7 @@ export default function SettingsModal({
             </div>
             <div className="settings-row">
                 <label className="settings-label" htmlFor="control-buttons-checkbox">
-                    Show control buttons
+                    Show touch screen buttons
                 </label>
                 <input
                     id="control-buttons-checkbox"

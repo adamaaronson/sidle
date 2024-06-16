@@ -8,7 +8,7 @@ interface Props {
     layer?: number;
 }
 
-export default function Modal({ title, children, onClose, layer = 0 }: Props) {
+export default function Modal({ title, children, onClose, layer = 10 }: Props) {
     return (
         <div className="modal-background" onClick={onClose} style={{ zIndex: layer * 2 + 1 }}>
             <AnimatePresence>

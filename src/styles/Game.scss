@@ -81,6 +81,7 @@
     appearance: none;
     line-height: 0;
     display: flex;
+    gap: 0.5rem;
     flex-direction: row;
     justify-content: space-between;
     user-select: none;
@@ -88,11 +89,12 @@
     -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
+    z-index: 5;
 
     .control-button {
         appearance: none;
         border: 3px solid $white-color;
-        background: none;
+        background: #1e1e1e66;
         color: $white-color;
         border-radius: 999px;
         width: 4rem;
