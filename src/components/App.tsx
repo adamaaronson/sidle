@@ -5,6 +5,7 @@ import Header from './Header';
 import Modal from './Modal';
 import SettingsModal from './SettingsModal';
 import levels from '../data/levels.json';
+import AboutModal from './AboutModal';
 
 const COPIED_MILLISECONDS = 2 * 1000; // 2 seconds
 const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -78,7 +79,7 @@ function App() {
             />
             {aboutModal && (
                 <Modal title="About" onClose={() => setAboutModal(false)}>
-                    <></>
+                    <AboutModal />
                 </Modal>
             )}
             {settingsModal && (

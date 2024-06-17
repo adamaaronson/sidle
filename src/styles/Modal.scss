@@ -19,10 +19,24 @@
     font-size: 1rem;
     overflow-y: auto;
     max-height: 100%;
+    max-width: min(300px, 95vw);
 
     p {
-        padding-top: 0.5rem;
-        padding-bottom: 1rem;
+        padding-top: 1.5rem;
+        line-height: 1.5em;
+    }
+
+    a {
+        color: $white-color;
+
+        &:hover {
+            opacity: 0.8;
+        }
+    }
+
+    .copyright-message {
+        font-size: 0.8em;
+        opacity: 0.8;
     }
 }
 
