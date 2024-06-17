@@ -6,7 +6,7 @@ export default function AboutModal() {
                 <a href="https://x.com/aaaronson" target="_blank" rel="noopener noreferrer">
                     Adam Aaronson
                 </a>
-                . It came to him in a dream. Or not quite a dream, but a hypnagogic state.
+                . It came to him in a dream. Or not quite a dream, but not a fully waking state either.
             </p>
 
             <p>
