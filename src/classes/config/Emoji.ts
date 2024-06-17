@@ -3,7 +3,7 @@ enum Emoji {
     PlayerHighContrast = '🟦',
     Block = '🟩',
     BlockHighContrast = '🟧',
-    BackgroundDark = '⬛️',
+    BackgroundDark = '⬛',
     BackgroundLight = '⬜',
 }
 
