@@ -3,7 +3,7 @@ export default function AboutModal() {
         <div>
             <p>
                 Sidle was designed and developed by{' '}
-                <a href="https://aaronson.org" target="_blank" rel="noopener noreferrer">
+                <a href="https://x.com/aaaronson" target="_blank" rel="noopener noreferrer">
                     Adam Aaronson
                 </a>
                 . It came to him in a dream. Or not quite a dream, but a hypnagogic state.
