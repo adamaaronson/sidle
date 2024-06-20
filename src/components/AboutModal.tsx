@@ -7,7 +7,7 @@ export default function AboutModal() {
                     Adam Aaronson
                 </a>
                 . It came to him in a dream. Or not quite a dream, but not a fully waking state either. To learn more,{' '}
-                <a href="https://youtu.be/1wnE4vF9CQ4" target="_blank" rel="noopener noreferrer">
+                <a href="https://aaronson.org/blog/sidle" target="_blank" rel="noopener noreferrer">
                     read the blog post!
                 </a>
             </p>
